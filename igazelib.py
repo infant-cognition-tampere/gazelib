@@ -1,13 +1,16 @@
-# Igazelib: A low level library for analyzing gaze-data files.
-# Gaze-data is expected to be in JSON-format such as list of 
-# datapoints with dict storing the properties and
-#  
+# igazelib: A low level library for analyzing gaze-data files provided
+# usually by eyetracker-devices.
+# Gaze-data is expected to be in JSON-format such as list of
+# datapoints with similar dict storing the properties for each point. Example:
+# [{xcoordinate:0.4, ...}, {xcoordinate:0.5, ...}, ..., {xcoordinate:-1, ...}]
+# List elements are called "gazepoints", and dict keys as "keys".
 #
-# Library is designed to be used with a script file 
-# that calls igazelib to perform different analysis steps.
+# igazelib-library is designed to be used with a script file
+# that calls the library functions to perform different analysis steps.
 #
-# Created by researchers in Infant Cognition Lab, 
+# Created by researchers in Infant Cognition Lab,
 # University of Tampere, Finland
+
 
 import csv
 import numpy
@@ -16,7 +19,7 @@ import json
 indent = "  "
 
 ############# technical functions ###############
-def loadJSON(filename):
+def load_JSON(filename):
 	# load json-type file
 
 	with open(filename) as data_file:
@@ -24,18 +27,23 @@ def loadJSON(filename):
 
 	return data
 
-def writeJSON(filename, data):
+
+def write_JSON(filename, data):
+	# Dump all the JSON in a file.
 	obj = open(filename, 'wb')
 	obj.write(str(data))
 	obj.close
 
-def writeFancyJSON(filename, data):
+
+def write_fancy_JSON(filename, data):
+	# Write json so that it is readable by humans (rowchange, indent..).
 	with open(filename, 'w') as outfile:
 		json.dump(data, outfile, sort_keys = True, indent = 4, ensure_ascii=False)
 
 
-def loadCsvAsJSON(filename, delimit):
-	# load the file and return data in usable form
+def load_csv_as_dictlist(filename, delimit):
+	# Load a file in csv (common in .gazedata) and return data in JSON suitable
+	# for analysis.
 
 	print "Loading csv-file " + filename
 
@@ -66,71 +74,72 @@ def loadCsvAsJSON(filename, delimit):
 	print "File loaded succesfully. " + str(len(rows)) + " rows read."
 	return rows
 
+
+
 ############# technical functions ###############
 
-def firstRowsTime(data, time_key, timeunits):
+def first_gazepoints_by_time(data, time_key, timeunits):
 	# Clip first rows from DATA before milliseconds count of time has passed
 
-	print "Picking first " + str(timeunits) + " timeunit rows from data using TETTime..."
-	print indent + "Datamatrix contains " + str(len(data)) + " rows before operation."
+	print "Picking first " + str(timeunits) + " timeunit gazepoints from data..."
+	print indent + "List contains " + str(len(data)) + " gazepoints before operation."
 
 	starttime = int(data[0][time_key])
-	new_data = [ row for row in data if timeunits>int(row[time_key])-starttime ]
+	new_data = [ gp.copy() for gp in data if timeunits>int(gp[time_key])-starttime ]
 
-	print indent + "Datamatrix contains " + str(len(new_data)) + " rows after operation."
+	print indent + "List contains " + str(len(new_data)) + " gazepoints after operation."
 	return new_data
 
 
-def firstRows(data, rowcount):
+def first_gazepoints(data, gpcount):
 	# Clip first rows from DATA before milliseconds count of time has passed
 
-	print "Picking first " + str(rowcount) + " rows from data..."
-	print indent + "Datamatrix contains " + str(len(data)) + " rows before operation."
+	print "Picking first " + str(gpcount) + " gazepoints from data..."
+	print indent + "List contains " + str(len(data)) + " gazepoints before operation."
 
-	new_data = [ row for rowindex, row in enumerate(data) if  rowindex < rowcount]
+	new_data = [ gp.copy() for gpindex, gp in enumerate(data) if  gpindex < gpcount]
 
-	print indent + "Datamatrix contains " + str(len(new_data)) + " rows after operation."
+	print indent + "List contains " + str(len(new_data)) + " gazepoints after operation."
 	return new_data
 
 
-def rowsAfterTime(data, time_key, timeunits):
-	# Clip rows from DATA after milliseconds count of time has passed
+def gazepoints_after_time(data, time_key, timeunits):
+	# Clip rows from DATA after [timeunits] count of time has passed
 
-	print "Picking rows after " + str(timeunits) + " timeunits from data using TETTime..."
-	print indent + "Datamatrix contains " + str(len(data)) + " rows before operation."
+	print "Picking gazepoints after " + str(timeunits) + " timeunits from data using TETTime..."
+	print indent + "List contains " + str(len(data)) + " gazepoints before operation."
 
 	# find the time of the first datapoint of the list
-	starttime = int(data[0][time_key])
+	starttime = int(get_value(data, 0, time_key))
 
-	# generate a new list of datapoints 
-	new_data = [ row for row in data if timeunits<=int(row[time_key])-starttime ]
+	# generate a new list of datapoints
+	new_data = [ gp.copy() for gp in data if timeunits<=int(gp[time_key])-starttime ]
 
-	print indent + "Datamatrix contains " + str(len(new_data)) + " rows after operation."
+	print indent + "List contains " + str(len(new_data)) + " gazepoints after operation."
 	return new_data
 
 
-def getRowsContainingValue(data, key, value_list):
+def gazepoints_containing_value(data, key, value_list):
 	# return the rows that contain certain value
 
-	print "Picking rows with values " + str(value_list) + " provided in column " + str(key)
-	print indent + "Datamatrix contains " + str(len(data)) + " rows."
+	print "Picking gazepoints with values " + str(value_list) + " assosiated with key " + str(key)
+	print indent + "List contains " + str(len(data)) + " gazepoints before operation."
 
 	# check if input is really a list
 	assert isinstance(value_list, list)
 
-	# find rows which contain the value
-	rows_found = [ row for row in data if row[key] in value_list ]
+	# find gazepoints which contain the value
+	gazepoints_found = [ gp.copy() for gp in data if gp[key] in value_list ]
 
-	print indent + "Datamatrix contains " + str(len(rows_found)) + " rows."
+	print indent + "Datamatrix contains " + str(len(gazepoints_found)) + " gazepoints."
+	return gazepoints_found
 
-	return rows_found
 
-
-def getRowsNotContainingValue(data, key, value_list):
+def gazepoints_not_containing_value(data, key, value_list):
 	# return the rows that DO NOT contain certain value
 
-	print "Picking rows without values " + str(value_list) + " provided in column " + str(key)
-	print indent + "Datamatrix contains " + str(len(data)) + " rows."
+	print "Picking gazepoints without values " + str(value_list) + " assosiated with key " + str(key)
+	print indent + "List contains " + str(len(data)) + " gazepoints."
 
 	# check if input is really a list
 	assert isinstance(value_list, list)
@@ -138,56 +147,63 @@ def getRowsNotContainingValue(data, key, value_list):
 	# find rows which do not contain the value
 	rows_found = [ row for row in data if row[key] not in value_list  ]
 
-	print indent + "Datamatrix contains " + str(len(rows_found)) + " rows."
-
+	print indent + "List contains " + str(len(rows_found)) + " gazepoints."
 	return rows_found
 
 
-def clipAtChangeInValue(data, colnum):
-	# Clip one list to multiple lists. New list is started each time when
+def split_at_change_in_value(data, key):
+	# Split one list to multiple lists. New list is started each time when
 	# value in the column changes from previous one. Omitted on the case of
 	# first element.
 
 	# return list of lists
-	print "Clipping data when change in column: " + str(colnum)
+	print "Splitting data when change in value for key: " + str(key)
 
 	list_of_new_datas = []
 
 	new_data = []
-	for rownum, row in enumerate(data):
-		if rownum > 0:
-			if previous_item == row[colnum]:
-				new_data.append(row)
-			else:
+	previous_item = None
+
+	# loop throught all gazepoints
+	for gp in data:
+
+		# if there is gazepoints before
+		if previous_item is not None:
+
+			# if previous item does not match the one we are processing
+			if not previous_item == gp[key]:
 				list_of_new_datas.append(new_data)
 				new_data = []
 
-		previous_item = row[colnum]
+		new_data.append(gp.copy())
+		previous_item = gp[key]
 
-	print indent + "Returning " + str(len(list_of_new_datas)) + " dataclips."
-	print indent + "Done."
+	# append the last remaining clip when all looped
+	list_of_new_datas.append(new_data)
 
+	print indent + "Returning " + str(len(list_of_new_datas)) + " gazepoint lists."
 	return list_of_new_datas
 
 
-def getValue(data, row, key):
-	# returns a value from row, column
+def get_value(data, gazepoint, key):
+	# Returns a value from specific datapoint with specific key.
 
-	return data[row][key]
+	return data[gazepoint][key]
 
 
-def replaceValue(data, colnum, value_to_replace, value):
-	# replaces all values value_to_replace on column with value.
+def replace_value(data, key, value_to_replace, value):
+	# replaces all values value_to_replace on key with value.
 
-	print "Replacing values in column " + str(colnum) + " with value " + value_to_replace
+	print "Replacing values for key:" + str(key) + " with value " + str(value_to_replace)
+	new_values = [value if gp[key] == value_to_replace else gp[key] for gp in data]
 
-	new_data = [value if row[colnum] == value_to_replace else row[colnum] for row in data]
+	new_data = add_key(data, key, new_values)
 
 	print indent + "Done."
 	return new_data
 
 
-def borderViolation(data, aoi, xcol, ycol, valcol, accepted_validities):
+def border_violation(data, aoi, xkey, ykey, valkey, accepted_validities):
 	# Return true if during-non valid perioid gaze has crossed aoi-border.
 
 	print "Calculating if a gaze moved over aoi border during invalid data..."
@@ -198,14 +214,14 @@ def borderViolation(data, aoi, xcol, ycol, valcol, accepted_validities):
 	for index, row in enumerate(data):
 
 	#	if accepted_validities.__contains__(row[valcol]):
-		if row[valcol] in accepted_validities:
+		if row[valkey] in accepted_validities:
 			# gaze okay
 			gaze_okay = True
 		else:
 			# gaze not okay
 			gaze_okay = False
 
-		gaze_inside = insideAoi(aoi, row[xcol], row[ycol])
+		gaze_inside = inside_aoi(aoi, row[xkey], row[ykey])
 
 		if index > 0:
 			if gaze_okay:
@@ -221,8 +237,8 @@ def borderViolation(data, aoi, xcol, ycol, valcol, accepted_validities):
 	return False
 
 
-def insideAoi(aoi, x, y):
-	# if coordinates inside aoi, return true, otherwise false
+def inside_aoi(aoi, x, y):
+	# If coordinates are inside aoi, return true, otherwise false.
 
 	if (aoi["x1"] < x  and x < aoi["x2"]) and (aoi["y1"] < y and y < aoi["y2"]):
 		return True
@@ -230,8 +246,8 @@ def insideAoi(aoi, x, y):
 		return False
 
 
-def combineEyes(data, accepted_validities, rxkey, rykey, rvalkey, lxkey, lykey, lvalkey):
-	# Combine two coordinate-columns with third validity-column to one column
+def combine_coordinates(data, accepted_validities, rxkey, rykey, rvalkey, lxkey, lykey, lvalkey):
+	# Combine two coordinate-columns with third validity-column to one column.
 
 	print "Combining two columns..."
 
@@ -241,82 +257,55 @@ def combineEyes(data, accepted_validities, rxkey, rykey, rvalkey, lxkey, lykey, 
 
 	# loop all rows and collect x, y coordinates + minimum validity value (assumed to be best)
 	for row in data:
-		x.append(meanOfValidValues([row[rxkey], row[lxkey]], [row[rvalkey], row[lvalkey]], accepted_validities))
-		y.append(meanOfValidValues([row[rykey], row[lykey]], [row[rvalkey], row[lvalkey]], accepted_validities))
+		x.append(mean_of_valid_values([row[rxkey], row[lxkey]], [row[rvalkey], row[lvalkey]], accepted_validities))
+		y.append(mean_of_valid_values([row[rykey], row[lykey]], [row[rvalkey], row[lvalkey]], accepted_validities))
 		val.append(numpy.min([int(row[rvalkey]), int(row[lvalkey])]))
 
 	print indent + "Done."
 	return map(str, x), map(str, y), map(str, val)
 
 
-def meanOfValidValues(values, validities, accepted_validities):
-	# Returns mean of good validity tagged values. If none, returns -1.
+def add_key(data, key, new_values):
+	# Adds a key to the datapoint-list. New_values must match in length to
+	# the column with keys.
 
-	goodvalues = []
-
-	for index, i in enumerate(values):
-		if validities[index] in accepted_validities:
-			goodvalues.append(float(i))
-
-	if len(goodvalues) == 0:
-			return -1
-	else:
-		return numpy.mean(goodvalues)
-
-
-def addKey(data, column, key):
-
-	print "Adding " + key + "-key to dataset.."
+	#print "Adding " + key + "-key to dataset.."
 
 	new_data = []
-	for index, row in enumerate(data):
-		new_row = row
-		new_row[key] = column[index]
-		new_data.append(new_row)
+	for index, gp in enumerate(data):
+		new_gp = gp.copy()				# use copy-method to not only affect pointer
+		new_gp[key] = new_values[index]
+		new_data.append(new_gp)
 
-	print indent + "Done"
-
+	#print indent + "Done."
 	return new_data
 
 
-def getColumn(data, colnum):
+def get_key(data, key):
+	# Returns a list of values, from single key in the data-parameter.
 
-	print "Getting data from column " + str(colnum) + "..."
+	#print "Getting data from key " + str(key) + "..."
 
 	column = []
 
 	for row in data:
-		column.append(row[colnum])
+		column.append(row[key])
 
-	print indent + "Done."
-
+	#print indent + "Done."
 	return column
 
 
-def replaceColumn(data, colnum, newcol):
-
-	print "Replacing column " + str(colnum) + " with new column..."
-
-	new_data = []
-	for rownum, row in enumerate(data):
-		row[colnum] = newcol[rownum]
-		new_data.append(row)
-
-	print indent + "Done."
-	return new_data
-
-
-def medianFilterData(data, winlen, key):
+def median_filter_data(data, winlen, key):
 	# Performs median filtering to the datapoints in the specified column on
 	# DATA-structure. Further information see help medianFilter.
 	# Column specifies the column to filter the data with
 
-	new_data = replaceColumn(data, key, medianFilter(getColumn(data, key), winlen))
+	new_data = add_key(data, key, median_filter(get_key(data, key), winlen))
 
 	return new_data
 
 
-def medianFilter(datapoints, winlen):
+def median_filter(datapoints, winlen):
 	# Performs median filtering to the datapoints with window-length winlen.
 	# Winlen must be an odd integer
 	# (window: sample-(winlen-1)/2..sample..sample+(winlen-1)/2.
@@ -347,7 +336,7 @@ def medianFilter(datapoints, winlen):
 	return filtered_datapoints
 
 
-def interpolateUsingLastGoodValue(data, key, valcol, accepted_validities):
+def interpolate_using_last_good_value(data, key, valkey, accepted_validities):
 	# Interpolates values with key "key" in DATA-matrix by replacing the bad
 	# value with last good value before bad values (if there is at least one good
 	# value, otherwise, do nothing). Validitycolumn contains the validity markings
@@ -359,36 +348,35 @@ def interpolateUsingLastGoodValue(data, key, valcol, accepted_validities):
 
 	# find the first non-bad, if any
 
-	firstrow = -1
-	for rownum, row in enumerate(data):
+	first_valid = -1
+	for gpnum, gp in enumerate(data):
 
-		if row[valcol] in accepted_validities and firstrow == -1:
-			firstrow = rownum
+		if gp[valkey] in accepted_validities and first_valid == -1:
+			first_valid = gpnum
 
 	# there was at least one good value
-	if firstrow == -1:
+	if first_valid == -1:
 		# if not, return data as it was
-		print indent + "No good data available"
-		print indent + "Done."
+		print indent + "Done. No good data available"
 		return data
 
 	new_data = []
 
-	last_non_bad = data[firstrow][key]
-	for row in data:
-		if row[valcol] in accepted_validities:
+	last_non_bad = get_value(data, first_valid, key)
+	for gp in data:
+		if gp[valkey] in accepted_validities:
 			# valid data
-			last_non_bad = row[key]
+			last_non_bad = gp[key]
 		else:
-		    row[key] = last_non_bad
+		    gp[key] = last_non_bad
 
-		new_data.append(row)
+		new_data.append(gp)
 
 	print indent + "Done."
 	return new_data
 
 
-def gazeInsideAoi(data, xcol, ycol, aoi, firstorlast):
+def gaze_inside_aoi(data, xcol, ycol, aoi, firstorlast):
 	# Finds either the first row when gaze enters aoi or last.
 	# If gaze does not enter aoi, return -1
 
@@ -396,7 +384,7 @@ def gazeInsideAoi(data, xcol, ycol, aoi, firstorlast):
 
 	last_in = -1
 	for rownumber, row in enumerate(data):
-		if insideAoi(aoi, row[xcol], row[ycol]):
+		if inside_aoi(aoi, row[xcol], row[ycol]):
 			if firstorlast == "first":
 				print indent + "Done."
 				return rownumber
@@ -404,12 +392,11 @@ def gazeInsideAoi(data, xcol, ycol, aoi, firstorlast):
 			last_in = rownumber
 
 	print indent + "Done."
-
 	return last_in
 
 
-def gazeInsideAoiPercentage(data, xcol, ycol, aoi):
-	# calculate the percentage of gaze inside aoi borders on given data.	
+def gaze_inside_aoi_percentage(data, xcol, ycol, aoi):
+	# calculate the percentage of gaze inside aoi borders on given data.
 
 	print "Calculating when the portion of gaze inside aoi: " + str(aoi)
 
@@ -420,57 +407,58 @@ def gazeInsideAoiPercentage(data, xcol, ycol, aoi):
 
 	gaze_inside = 0
 	for row in data:
-		if insideAoi(aoi, row[xcol], row[ycol]):
+		if inside_aoi(aoi, row[xcol], row[ycol]):
 			gaze_inside = gaze_inside + 1
 
+	print indent + "Done."
 	return gaze_inside/float(rowcount)
 
-def longestNonValidStreak(data, valcol, timecol, accepted_validities):
+
+def longest_non_valid_streak(data, valkey, timekey, accepted_validities):
 	# Longest streak of non valid values
+
+	print "Calculating longest non-valid streak..."
 
 	longest_streak = 0
 	streak_on = False
 
-	for row in data:
+	for gp in data:
 
 		# check if ongoing streak and put to longest if is
 		if streak_on:
-			streaklen = float(row[timecol]) - float(streak_started)
+			streaklen = float(gp[timekey]) - float(streak_started)
 			if streaklen > longest_streak:
 				longest_streak = streaklen
 
 		# test if this datapoint valid and start streak or end it
-		valid = row[valcol] in accepted_validities
+		valid = gp[valkey] in accepted_validities
 		if valid:
 			streak_on = False
 		else:
 			if not streak_on:
-				streak_started = row[timecol]
+				streak_started = gp[timekey]
 			streak_on = True
 
+	print indent + "Done."
 	return longest_streak
 
 
-def validGazePercentage(data, valcol, accepted_validities):
+def valid_gaze_percentage(data, valkey, accepted_validities):
 	# Calculates the percentage of valid gaze in data.
 
 	if len(data) == 0:
 		return -1
 
 	valid = 0
-#	nonvalid = 0
 
-	for row in data:
-		if row[valcol] in accepted_validities:
+	for gp in data:
+		if gp[valkey] in accepted_validities:
 			valid = valid + 1
-#		else:
-#			nonvalid = nonvalid + 1
 
-	#return float(valid)/float(valid + nonvalid)
 	return float(valid)/float(len(data))
 
 
-def duration(data, timecol):
+def duration(data, timekey):
 	# returns the length of the data in time units
 
 	if len(data) == 0:
@@ -478,7 +466,7 @@ def duration(data, timecol):
 	elif len(data) <= 1:
 		return 0.0
 
-	return float(getValue(data, -1, timecol)) - float(getValue(data, 0, timecol))
+	return float(get_value(data, -1, timekey)) - float(get_value(data, 0, timekey))
 
 
 def SRT_index(rtimes, max_rt, min_rt):
@@ -493,4 +481,56 @@ def SRT_index(rtimes, max_rt, min_rt):
 	return numpy.mean(SRTs)
 
 
+def group(data, group_key, value_key):
+	# Groups a list of datapoint-dicts so that one of the keys is used as
+	#"grouping key" - according to this the values specified by "value key" are
+	# sorted to the dict containing lists.
 
+	datas_by_group = {}
+	for datapoint in data:
+
+		group = datapoint[group_key]
+		value = datapoint[value_key]
+
+		# if already entry of this type of group_key in the dict
+		if group in datas_by_group:
+			datas_by_group[group].append(value)
+		else:
+			datas_by_group[group] = [value]
+
+	return datas_by_group
+
+
+def group_lists(datas, group_key):
+	# Groups data by 0'th value in group_column and places each subset to a group
+	# defined by group_column.
+	# parameter: list of datas (data:list of rows), grouping key
+	# value in datapoint[0][group_key] expected to exist
+
+	datas_by_group = {}
+	for data in datas:
+		group = get_value(data, 0, group_key)
+
+		# if already entry of this key in the
+		if group in datas_by_group:
+			datas_by_group[group] = datas_by_group[group] + data
+		else:
+			datas_by_group[group] = data
+
+	return datas_by_group
+
+
+def mean_of_valid_values(values, validities, accepted_validities):
+	# Returns mean of good validity tagged values. If none, returns -1.
+	# values: list, validities:list
+
+	goodvalues = []
+
+	for index, i in enumerate(values):
+		if validities[index] in accepted_validities:
+			goodvalues.append(float(i))
+
+	if len(goodvalues) == 0:
+			return -1
+	else:
+		return numpy.mean(goodvalues)
