@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
 parts/
 sdist/
@@ -31,6 +31,7 @@ var/
 
 # Installer logs
 pip-log.txt
+pip-selfcheck.json
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
@@ -56,5 +57,13 @@ docs/_build/
 # PyBuilder
 target/
 
-# Os X crap
+# Virtualenv
+/bin/
+/include/
+/share/
+
+# OS X
 .DS_Store
+
+# Jupyter
+.ipynb_checkpoints
