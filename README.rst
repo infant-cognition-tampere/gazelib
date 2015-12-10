@@ -138,7 +138,7 @@ Follow `python packaging instructions
 2.  Create a universal wheel: ``$ python setup.py bdist_wheel --universal``
 3.  Go to `PyPI and register the project by filling the package form
     <https://pypi.python.org/pypi?%3Aaction=submit_form>`_ by uploading
-    ``saccademodel.egg-info/PKG_INFO`` file.
+    ``igazelib.egg-info/PKG_INFO`` file.
 4.  Upload the package with twine:
 
     1. Sign the dist: ``$ gpg --detach-sign -a dist/igazelib-1.2.3*``
