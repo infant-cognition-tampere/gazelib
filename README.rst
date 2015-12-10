@@ -26,6 +26,39 @@ With `pip
 3. API
 ======
 
+The API provides the following methods:
+
+- add_key
+- border_violation
+- combine_coordinates
+- duration
+- first_gazepoints
+- first_gazepoints_by_time
+- gaze_inside_aoi
+- gaze_inside_aoi_percentage
+- gazepoints_after_time
+- gazepoints_containing_value
+- gazepoints_not_containing_value
+- get_key
+- get_value
+- group
+- group_lists
+- inside_aoi
+- interpolate_using_last_good_value
+- load_JSON
+- load_csv_as_dictlist
+- longest_non_valid_streak
+- mean_of_valid_values
+- median_filter
+- median_filter_data
+- replace_value
+- SRT_index
+- split_at_change_in_value
+- valid_gaze_percentage
+- version
+- write_JSON
+- write_fancy_JSON
+
 
 
 4. For developers
@@ -69,9 +102,9 @@ or run comprehensive tests for multiple Python versions listed in ``tox.ini``::
     $ pyenv rehash
     $ tox
 
-Install new pyenv environments by::
+Install new pyenv environments for example by::
 
-    $ pyenv install 3.4.5
+    $ pyenv install 3.5.0
 
 Validate README.rst at `http://rst.ninjs.org/
 <http://rst.ninjs.org/>`_
