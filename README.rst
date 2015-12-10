@@ -149,6 +149,18 @@ Follow `python packaging instructions
 Updating the package takes same steps except the 3rd.
 
 
+4.5 Version release
+-------------------
+
+1.  Edit version string in ``igazelib/version.py`` and ``setup.py`` to
+    ``'1.2.3'``
+2.  Run tox tests. See *4.3. Testing*.
+3.  Git commit: ``$ git commit --all -m "v1.2.3 release"``
+4.  Create tag: ``$ git tag -a 1.2.3 -m "v1.2.3 stable"``
+5.  Push commits and tags: ``$ git push && git push --tags``
+6.  Publish to PyPI. See *4.4. Publish to PyPI*.
+
+
 
 5. Versioning
 =============
