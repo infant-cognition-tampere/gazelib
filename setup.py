@@ -28,7 +28,7 @@ setup(
     url='https://github.com/infant-cognition-tampere/igazelib',
     author='Akseli Palen',
     author_email='akseli.palen@gmail.com',
-    license='MIT',
+    license='GPLv3',
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
