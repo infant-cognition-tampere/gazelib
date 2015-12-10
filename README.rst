@@ -67,12 +67,30 @@ The API provides the following methods:
 Tips for the developers of the package.
 
 
-4.1. Clone from GitHub
-----------------------
+4.1. Use Git
+------------
 
 To develop, clone the repository from GitHub::
 
     $ git clone https://github.com/infant-cognition-tampere/igazelib
+
+Make changes to files, add them to commit, and do commit::
+
+    (edit README.rst)
+    $ git add README.rst
+    $ git commit -m "Improved documentation"
+
+List files that are not added or not committed::
+
+    $ git status
+
+Push local commits to GitHub::
+
+    $ git push
+
+Ignore some files by editing ``.gitignore``::
+
+    $ nano .gitignore
 
 
 4.2. Virtualenv
