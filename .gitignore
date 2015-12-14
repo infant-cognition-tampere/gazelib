@@ -57,6 +57,9 @@ docs/_build/
 # PyBuilder
 target/
 
+# Virtualenv
+/venv/
+
 # OS X
 .DS_Store
 
