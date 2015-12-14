@@ -98,9 +98,9 @@ Ignore some files by editing ``.gitignore``::
 
 Manage python versions and requirements by using virtualenv::
 
-    $ virtualenv -p python3.5 gazelib
     $ cd gazelib
-    $ source bin/activate
+    $ virtualenv -p python3.5 env
+    $ source env/bin/activate
     ...
     $ deactivate
 
