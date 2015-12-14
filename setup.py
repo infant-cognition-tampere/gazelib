@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Igazelib for Python
+Gazelib for Python
 
 This setup.py is based on:
 https://packaging.python.org/en/latest/distributing.html
@@ -21,11 +21,11 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='igazelib',
+    name='gazelib',
     version='0.1.0',
     description='Software tools to manage and analyze gaze data from eye-trackers',
     long_description=long_description,
-    url='https://github.com/infant-cognition-tampere/igazelib',
+    url='https://github.com/infant-cognition-tampere/gazelib',
     author='Akseli Palen',
     author_email='akseli.palen@gmail.com',
     license='GPLv3',
@@ -61,7 +61,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=['igazelib'],
+    packages=['gazelib'],
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:

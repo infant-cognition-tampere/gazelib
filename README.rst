@@ -1,10 +1,10 @@
 ========
-igazelib
+gazelib
 ========
 
-The Python package *igazelib* provides software tools to manage and analyze gaze data from eye-trackers.
+The Python package *gazelib* provides software tools to manage and analyze gaze data from eye-trackers.
 
-*Igazelib* is developed at `Infant Cognition Laboratory
+*Gazelib* is developed at `Infant Cognition Laboratory
 <http://www.uta.fi/med/icl/index.html>`_ at University of Tampere.
 
 
@@ -13,9 +13,9 @@ The Python package *igazelib* provides software tools to manage and analyze gaze
 ==========
 
 With `pip
-<https://pypi.python.org/pypi/igazelib>`_::
+<https://pypi.python.org/pypi/gazelib>`_::
 
-    $ pip install igazelib
+    $ pip install gazelib
 
 
 
@@ -72,7 +72,7 @@ Tips for the developers of the package.
 
 To develop, clone the repository from GitHub::
 
-    $ git clone https://github.com/infant-cognition-tampere/igazelib
+    $ git clone https://github.com/infant-cognition-tampere/gazelib
 
 Make changes to files, add them to commit, and do commit::
 
@@ -98,8 +98,8 @@ Ignore some files by editing ``.gitignore``::
 
 Manage python versions and requirements by using virtualenv::
 
-    $ virtualenv -p python3.5 igazelib
-    $ cd igazelib
+    $ virtualenv -p python3.5 gazelib
+    $ cd gazelib
     $ source bin/activate
     ...
     $ deactivate
@@ -138,11 +138,11 @@ Follow `python packaging instructions
 2.  Create a universal wheel: ``$ python setup.py bdist_wheel --universal``
 3.  Go to `PyPI and register the project by filling the package form
     <https://pypi.python.org/pypi?%3Aaction=submit_form>`_ by uploading
-    ``igazelib.egg-info/PKG_INFO`` file.
+    ``gazelib.egg-info/PKG_INFO`` file.
 4.  Upload the package with twine:
 
-    1. Sign the dist: ``$ gpg --detach-sign -a dist/igazelib-1.2.3*``
-    2. Upload: ``twine upload dist/igazelib-1.2.3*`` (will ask your PyPI password)
+    1. Sign the dist: ``$ gpg --detach-sign -a dist/gazelib-1.2.3*``
+    2. Upload: ``twine upload dist/gazelib-1.2.3*`` (will ask your PyPI password)
 
 5. Package published!
 
@@ -152,7 +152,7 @@ Updating the package takes same steps except the 3rd.
 4.5 Version release
 -------------------
 
-1.  Change version string in ``igazelib/version.py`` and ``setup.py`` to
+1.  Change version string in ``gazelib/version.py`` and ``setup.py`` to
     ``'1.2.3'``
 2.  Run tox tests. See *4.3. Testing*.
 3.  Git commit: ``$ git commit --all -m "v1.2.3 release"``

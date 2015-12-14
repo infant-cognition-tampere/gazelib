@@ -1,11 +1,11 @@
-# igazelib: A low level library for analyzing gaze-data files provided
+# gazelib: A low level library for analyzing gaze-data files provided
 # usually by eyetracker-devices.
 # Gaze-data is expected to be in JSON-format such as list of
 # datapoints with similar dict storing the properties for each point. Example:
 # [{xcoordinate:0.4, ...}, {xcoordinate:0.5, ...}, ..., {xcoordinate:-1, ...}]
 # List elements are called "gazepoints", and dict keys as "keys".
 #
-# igazelib-library is designed to be used with a script file
+# gazelib-library is designed to be used with a script file
 # that calls the library functions to perform different analysis steps.
 #
 # Created by researchers in Infant Cognition Lab,
