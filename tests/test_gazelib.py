@@ -1,8 +1,26 @@
 import gazelib
 import unittest2 as unittest  # to support Python 2.6
+import os
+
+class TestIO(unittest.TestCase):
+
+    # Find file path
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+
+    def test_read_csv(self):
+        sample_filepath = os.path.join(self.this_dir, 'sample.gazedata')
+
+        dl = gazelib.load_csv_as_dictlist(sample_filepath)
+        self.assertEqual(len(dl), 10)
+
+    def test_read_json(self):
+        sample_filepath = os.path.join(self.this_dir, 'sample.json')
+
+        dl = gazelib.load_json(sample_filepath)
+        self.assertEqual(len(dl), 10)
 
 
-class TestgazelibMethods(unittest.TestCase):
+class TestGazelibMethods(unittest.TestCase):
 
     data = [
         {'x':0.1, 'y':-1, 'xval':1, 'yval':8, 'tag':'target', 'time':1},
@@ -13,7 +31,7 @@ class TestgazelibMethods(unittest.TestCase):
         {'x':0.1, 'y':0.2, 'xval':1, 'yval':1, 'tag':'target2', 'time':6} ]
 
     def test_selections(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # get value works with some input
         self.assertEqual(gazelib.get_value(data, 3, 'x'), 0.8)
@@ -41,7 +59,7 @@ class TestgazelibMethods(unittest.TestCase):
 
 
     def test_split(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # data splitting when change in key
         data_splitted = gazelib.split_at_change_in_value(data, 'tag')
@@ -52,7 +70,7 @@ class TestgazelibMethods(unittest.TestCase):
         self.assertEqual(gazelib.get_value(data_splitted[1], 0, 'time'), 3)
 
     def test_filter_and_interpolation(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # median filter (for vector)
         filtered = gazelib.median_filter(gazelib.get_key(data, 'x'), 3)
@@ -71,7 +89,7 @@ class TestgazelibMethods(unittest.TestCase):
 
 
     def test_keyadd(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # adding keys
         data2 = gazelib.add_key(data, 'z', len(data)*[-1])
@@ -87,7 +105,7 @@ class TestgazelibMethods(unittest.TestCase):
         self.assertEqual(gazelib.longest_non_valid_streak(data, 'yval', 'time', [0,1]), 2)
 
     def test_aoi(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # aoi-specific methods
         aoi = {"x1":0.35, "x2":0.45, "y1":0.05, "y2":0.8}
@@ -98,13 +116,13 @@ class TestgazelibMethods(unittest.TestCase):
         self.assertFalse(gazelib.border_violation(data, aoi, 'x', 'y', 'xval', [1]))
 
     def test_validity(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # validity
         self.assertAlmostEqual(gazelib.valid_gaze_percentage(data, 'yval', [1]), 0.5)
 
     def test_grouping_and_combination(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         # eye-combination tests
         self.assertAlmostEqual(gazelib.mean_of_valid_values([0.4, 0.2], [3, 1], [1]), 0.2)
@@ -128,7 +146,7 @@ class TestgazelibMethods(unittest.TestCase):
         #self.assertEqual(SRT_index(rtimes, 1000, 100), 100)
 
     def test_replace(self):
-        data = TestgazelibMethods.data
+        data = TestGazelibMethods.data
 
         data_replaced = gazelib.replace_value(data, 'tag', 'target', 'target3')
         data_replaced_correct = data[:]

@@ -45,7 +45,7 @@ The API provides the following methods:
 - group_lists
 - inside_aoi
 - interpolate_using_last_good_value
-- load_JSON
+- load_json
 - load_csv_as_dictlist
 - longest_non_valid_streak
 - mean_of_valid_values
@@ -56,8 +56,8 @@ The API provides the following methods:
 - split_at_change_in_value
 - valid_gaze_percentage
 - version
-- write_JSON
-- write_fancy_JSON
+- write_json
+- write_fancy_json
 
 
 
@@ -141,7 +141,7 @@ Follow `python packaging instructions
     ``gazelib.egg-info/PKG_INFO`` file.
 4.  Upload the package with twine:
 
-    1. Sign the dist: ``$ gpg --detach-sign -a dist/gazelib-1.2.3*``
+    1. Sign the dist: ``$ gpg --detach-sign -a dist/gazelib-1.2.3.tar.gz`` and ``$ gpg --detach-sign -a dist/gazelib-1.2.3-py2.py3-none-any.whl``
     2. Upload: ``twine upload dist/gazelib-1.2.3*`` (will ask your PyPI password)
 
 5. Package published!
