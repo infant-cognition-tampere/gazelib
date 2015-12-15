@@ -1,5 +1,6 @@
 import gazelib
 import unittest2 as unittest  # to support Python 2.6
+from numpy import testing as nptest  # to assert almost equal lists
 import os
 
 class TestIO(unittest.TestCase):
@@ -28,7 +29,19 @@ class TestGazelibMethods(unittest.TestCase):
         {'x':0.4, 'y':0.7, 'xval':1, 'yval':1, 'tag':'', 'time':3},
         {'x':0.8, 'y':0.2, 'xval':1, 'yval':2, 'tag':'target2', 'time':4},
         {'x':-1, 'y':-1, 'xval':4, 'yval':3, 'tag':'target2', 'time':5},
-        {'x':0.1, 'y':0.2, 'xval':1, 'yval':1, 'tag':'target2', 'time':6} ]
+        {'x':0.1, 'y':0.2, 'xval':1, 'yval':1, 'tag':'target2', 'time':6}
+    ]
+
+    # Two eyes
+    # combined x: 0.1, 0.3, 0.3, 0.8, -1, 0.1
+    data2 = [
+        {'rx':0.1, 'ry':0.3, 'lx':-1,  'ly':-1,  'rval':1, 'lval':8, 'tag':'target', 'time':1},
+        {'rx':0.4, 'ry':0.1, 'lx':0.2, 'ly':0.1, 'rval':1, 'lval':1, 'tag':'target', 'time':2},
+        {'rx':0.4, 'ry':0.7, 'lx':0.2, 'ly':0.9, 'rval':1, 'lval':1, 'tag':'', 'time':3},
+        {'rx':0.8, 'ry':0.2, 'lx':0.8, 'ly':0.2, 'rval':1, 'lval':2, 'tag':'target2', 'time':4},
+        {'rx':-1,  'ry':-1,  'lx':-1,  'ly':-1,  'rval':4, 'lval':3, 'tag':'target2', 'time':5},
+        {'rx':0.1, 'ry':0.2, 'lx':0.1, 'ly':0.2, 'rval':1, 'lval':1, 'tag':'target2', 'time':6}
+    ]
 
     def test_selections(self):
         data = TestGazelibMethods.data
@@ -129,6 +142,10 @@ class TestGazelibMethods(unittest.TestCase):
         self.assertAlmostEqual(gazelib.mean_of_valid_values([0.4, 0.2, 0], [1, 1, 2], [1,2]), 0.2)
         self.assertAlmostEqual(gazelib.mean_of_valid_values([0.4], [1], [1]), 0.4)
         self.assertAlmostEqual(gazelib.mean_of_valid_values([0.4], [2], [1]), -1)
+
+        xs, ys, vals = gazelib.combine_coordinates(TestGazelibMethods.data2,
+            [0, 1], 'rx', 'ry', 'rval', 'lx', 'ly', 'lval')
+        nptest.assert_almost_equal(xs, [0.1, 0.3, 0.3, 0.8, -1, 0.1], 5)
 
         # grouping test
         grouping = gazelib.group(data, 'tag', 'time')

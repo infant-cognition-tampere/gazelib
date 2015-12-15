@@ -200,7 +200,7 @@ def combine_coordinates(data, accepted_validities, rxkey, rykey, rvalkey, lxkey,
         val.append(numpy.min([int(row[rvalkey]), int(row[lvalkey])]))
 
     print(indent + "Done.")
-    return map(str, x), map(str, y), map(str, val)
+    return x, y, val
 
 
 def add_key(data, key, new_values):
