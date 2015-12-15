@@ -8,6 +8,11 @@ The Python package *gazelib* provides software tools to manage and analyze gaze 
 <http://www.uta.fi/med/icl/index.html>`_ at University of Tampere.
 
 
+.. image:: https://travis-ci.org/infant-cognition-tampere/gazelib.svg
+  :target: https://travis-ci.org/infant-cognition-tampere/gazelib
+.. image:: https://coveralls.io/repos/infant-cognition-tampere/gazelib/badge.svg?branch=master&service=github
+  :target: https://coveralls.io/github/infant-cognition-tampere/gazelib?branch=master
+
 
 1. Install
 ==========
