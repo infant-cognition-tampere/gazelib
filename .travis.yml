@@ -14,6 +14,7 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pandas bokeh
   - pip install python-coveralls nose-cov unittest2
+  - bash -c 'if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then pip install functools32; fi'
   - "pip install $(python setup.py --require)"
 # command to run tests
 script:
