@@ -1,0 +1,23 @@
+language: python
+python:
+  - "2.7"
+  - "3.5"
+#- "3.5-dev" # 3.5 development branch
+#sudo: true
+before_install:
+  - wget -O miniconda.sh https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda2/bin:$PATH
+  - conda update --yes conda
+# command to install dependencies
+install:
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pandas bokeh
+  - pip install python-coveralls nose-cov unittest2
+  - "pip install $(python setup.py --require)"
+# command to run tests
+script:
+  - nosetests --with-cov --cov gazelib --cov-config .coveragerc --logging-level=INFO
+
+after_success:
+  - coveralls --config_file .coveragerc
