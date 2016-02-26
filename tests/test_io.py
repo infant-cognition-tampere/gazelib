@@ -13,13 +13,13 @@ class TestIO(unittest.TestCase):
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
     def test_read_csv(self):
-        sample_filepath = os.path.join(self.this_dir, 'sample.gazedata')
+        sample_filepath = os.path.join(self.this_dir, 'fixtures', 'sample.gazedata')
 
         dl = gazelib.io.load_csv_as_dictlist(sample_filepath)
         self.assertEqual(len(dl), 10)
 
     def test_read_json(self):
-        sample_filepath = os.path.join(self.this_dir, 'sample.json')
+        sample_filepath = os.path.join(self.this_dir, 'fixtures', 'sample.json')
 
         dl = gazelib.io.load_json(sample_filepath)
         self.assertEqual(len(dl), 10)

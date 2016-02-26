@@ -11,11 +11,12 @@ import os
 
 def load_sample(sample_name):
     '''
+    Reads from fixtures/ directory
     Access e.g. by: load_sample('sample.common.json')
     '''
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    full_path = os.path.join(this_dir, sample_name)
+    full_path = os.path.join(this_dir, 'fixtures', sample_name)
     return gazelib.io.load_json(full_path)
 
 class TestCommonV1(unittest.TestCase):
