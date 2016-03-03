@@ -99,6 +99,18 @@ Install new pyenv environments for example by::
 Validate README.rst at `http://rst.ninjs.org/
 <http://rst.ninjs.org/>`_
 
+Tox + Travis CI + `Coveralls
+<https://coveralls.io/github/infant-cognition-tampere/gazelib>`_:
+
+- https://www.rfk.id.au/blog/entry/testing-better-coverage-tox/
+- http://coverage.readthedocs.org/en/latest/
+- https://github.com/z4r/python-coveralls
+- https://github.com/ryanhiebert/tox-travis
+- http://jsatt.com/blog/using-tox-with-travis-ci-to-test-django-apps/
+- http://agiliq.com/blog/2014/05/continuous-integration-with-travis-and-coverallsio/
+- https://github.com/openwebinars-django/testango
+
+
 
 Publishing to PyPI
 -----------------------
