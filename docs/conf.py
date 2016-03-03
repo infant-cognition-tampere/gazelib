@@ -53,8 +53,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'gazelib'
-copyright = '2016, Akseli Palén'
-author = 'Akseli Palén'
+copyright = u'2016, Akseli Palén'
+author = u'Akseli Palén'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
