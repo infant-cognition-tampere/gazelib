@@ -15,7 +15,7 @@ python:
 
 # command to install dependencies
 install:
-  - pip install tox-travis
+  - pip install tox-travis python-coveralls
 #  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas nose
 #  - pip install python-coveralls nose-cov unittest2
 #  - "pip install $(python setup.py --require)"
@@ -26,5 +26,5 @@ script:
 #  - nosetests --with-cov --cov gazelib --cov-config .coveragerc --logging-level=INFO
 
 after_success:
-#  - coveralls
-  - coveralls --config_file .coveragerc
+  - coveralls
+#  - coveralls --config_file .coveragerc
