@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
@@ -87,7 +88,7 @@ class CommonV1(object):
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
-          Does not update global_posix_time because easier implementation
+        Does not update global_posix_time because easier implementation.
         '''
 
         # The new copy
@@ -165,8 +166,8 @@ class CommonV1(object):
     def slice_by_global_time(self, start_time, end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
-          Updates the global_posix_time to start_time
-            to minimize representation size.
+            Updates the global_posix_time to start_time
+                to minimize representation size.
         '''
         r_start = self.convert_to_relative_time(start_time)
         r_end   = self.convert_to_relative_time(end_time)
@@ -179,10 +180,10 @@ class CommonV1(object):
         by the indices of the timeline.
 
         Parameters
-          timeline_name
-          start_index, inclusive
-          end_index (optional), exclusive, first element to not be included.
-            if None given, slice to the end
+            timeline_name
+            start_index, inclusive
+            end_index (optional), exclusive, first element to not be included.
+                if None given, slice to the end
         '''
         timelines = self.raw['timelines']
 

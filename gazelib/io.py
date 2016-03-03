@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Input-Output functions that help to read and write gazefiles in various formats.
 
