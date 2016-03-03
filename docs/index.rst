@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to gazelib's documentation!
-===================================
+gazelib API
+===========
 
 Contents:
 
@@ -14,6 +14,9 @@ Contents:
    gazelib
    modules
 
+Lots of eyetracker data to be managed? No common schema for the data? Tired of rewriting your analysis scripts for each project? Gazelib will help you!
+
+For the available tools, check out the API reference. 
 
 Indices and tables
 ==================

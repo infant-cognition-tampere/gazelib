@@ -30,7 +30,8 @@ Usage
 API
 ======
 
-See the docs/
+API docs are available under `docs/
+<https://rawgit.com/infant-cognition-tampere/gazelib/develop/docs/build/>`_.  
 
 For developers
 =================
