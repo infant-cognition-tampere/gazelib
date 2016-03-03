@@ -179,9 +179,10 @@ class CommonV1(object):
 
         Parameters
             timeline_name
-            start_index, inclusive
-            end_index (optional), exclusive, first element to not be included.
-                if None given, slice to the end
+            start_index: inclusive
+            end_index: optional, exclusive, first element to not be included.
+                If None given, slice to the end.
+
         '''
         timelines = self.raw['timelines']
 
