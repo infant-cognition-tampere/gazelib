@@ -12,7 +12,7 @@ before_install:
   - conda update --yes conda
 # command to install dependencies
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose pandas bokeh
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas nose
   - pip install python-coveralls nose-cov unittest2
   - "pip install $(python setup.py --require)"
 # command to run tests
