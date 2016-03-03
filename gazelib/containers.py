@@ -21,6 +21,7 @@ class CommonV1(object):
     class InvalidEventException(Exception):
         pass
 
+    @staticmethod
     def validate(raw_common):
         keys = [
           'schema',
