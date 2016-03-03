@@ -22,7 +22,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='gazelib',
-    version='0.1.1',
+    version='1.0.0',
     description='Software tools to manage and analyze gaze data from eye-trackers',
     long_description=long_description,
     url='https://github.com/infant-cognition-tampere/gazelib',
@@ -71,7 +71,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['numpy'],
+    install_requires=['deepdiff'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

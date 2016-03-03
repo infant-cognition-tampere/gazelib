@@ -14,7 +14,7 @@ The Python package *gazelib* provides software tools to manage and analyze gaze 
   :target: https://coveralls.io/github/infant-cognition-tampere/gazelib?branch=master
 
 
-1. Install
+Install
 ==========
 
 With `pip
@@ -24,55 +24,22 @@ With `pip
 
 
 
-2. Usage
+Usage
 ========
 
-
-3. API
+API
 ======
 
-The API provides the following methods:
+API docs are available under `docs/
+<https://rawgit.com/infant-cognition-tampere/gazelib/develop/docs/build/>`_.  
 
-- add_key
-- border_violation
-- combine_coordinates
-- duration
-- first_gazepoints
-- first_gazepoints_by_time
-- gaze_inside_aoi
-- gaze_inside_aoi_percentage
-- gazepoints_after_time
-- gazepoints_containing_value
-- gazepoints_not_containing_value
-- get_key
-- get_value
-- group
-- group_lists
-- inside_aoi
-- interpolate_using_last_good_value
-- load_json
-- load_csv_as_dictlist
-- longest_non_valid_streak
-- mean_of_valid_values
-- median_filter
-- median_filter_data
-- replace_value
-- SRT_index
-- split_at_change_in_value
-- valid_gaze_percentage
-- version
-- write_json
-- write_fancy_json
-
-
-
-4. For developers
+For developers
 =================
 
 Tips for the developers of the package.
 
 
-4.1. Use Git
+Use Git
 ------------
 
 To develop, clone the repository from GitHub::
@@ -98,19 +65,19 @@ Ignore some files by editing ``.gitignore``::
     $ nano .gitignore
 
 
-4.2. Virtualenv
+Virtualenv
 ---------------
 
 Manage python versions and requirements by using virtualenv::
 
     $ cd gazelib
-    $ virtualenv -p python3.5 env
-    $ source env/bin/activate
+    $ virtualenv -p python3.5 venv
+    $ source venv/bin/activate
     ...
     $ deactivate
 
 
-4.3. Testing
+Testing
 ------------
 
 Follow `instructions to install pyenv
@@ -133,7 +100,7 @@ Validate README.rst at `http://rst.ninjs.org/
 <http://rst.ninjs.org/>`_
 
 
-4.4. Publishing to PyPI
+Publishing to PyPI
 -----------------------
 
 Follow `python packaging instructions
@@ -154,7 +121,7 @@ Follow `python packaging instructions
 Updating the package takes same steps except the 3rd.
 
 
-4.5 Version release
+Version release
 -------------------
 
 1.  Change version string in ``gazelib/version.py`` and ``setup.py`` to
@@ -166,8 +133,14 @@ Updating the package takes same steps except the 3rd.
 6.  Publish to PyPI. See *4.4. Publishing to PyPI*.
 
 
+Compile documentation
+---------------------
 
-5. Versioning
+1.  ``$ sphinx-apidoc -o docs gazelib``
+2.  ``$ make -C docs html``
+
+
+Versioning
 =============
 
 `Semantic Versioning 2.0.0
@@ -175,7 +148,7 @@ Updating the package takes same steps except the 3rd.
 
 
 
-6. License
+License
 ==========
 
 `GNU General Public License version 3
