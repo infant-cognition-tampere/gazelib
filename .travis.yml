@@ -12,14 +12,19 @@ python:
 #  - ./miniconda.sh -b
 #  - export PATH=/home/travis/miniconda2/bin:$PATH
 #  - conda update --yes conda
+
 # command to install dependencies
-install: pip install tox-travis
+install:
+  - pip install tox-travis python-coveralls
 #  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas nose
 #  - pip install python-coveralls nose-cov unittest2
 #  - "pip install $(python setup.py --require)"
+
 # command to run tests
-script: tox
+script:
+  - tox
 #  - nosetests --with-cov --cov gazelib --cov-config .coveragerc --logging-level=INFO
 
-#after_success:
-#  - coveralls --config_file .coveragerc
+after_success:
+#  - coveralls
+  - coveralls --config_file .coveragerc
