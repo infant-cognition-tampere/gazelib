@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
-Input-Output functions that help to read and write gazefiles in various formats.
+Input-Output functions that help to read and write gaze data.
 
 '''
 import json
 import csv
+
 
 def load_json(filename):
     # load json-type file
@@ -23,7 +24,8 @@ def write_json(filename, data):
 def write_fancy_json(filename, data):
     # Write json so that it is readable by humans (rowchange, indent..).
     with open(filename, 'w') as outfile:
-        json.dump(data, outfile, sort_keys = True, indent = 4, ensure_ascii=False)
+        json.dump(data, outfile, sort_keys=True,
+                  indent=4, ensure_ascii=False)
 
 
 def load_csv_as_dictlist(filename, delimit='\t'):
@@ -38,7 +40,7 @@ def load_csv_as_dictlist(filename, delimit='\t'):
         print("File loading error: " + str(ex))
         return
 
-    reader = csv.reader(ifile, delimiter = delimit)#"\t")
+    reader = csv.reader(ifile, delimiter=delimit)
 
     rownum = 0
     rows = []
