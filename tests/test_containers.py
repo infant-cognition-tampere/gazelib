@@ -145,6 +145,10 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(g.get_environment('test_env'), 123)
         self.assertIn('test_env', g.get_environment_names())
 
+        self.assertTrue(g.has_environments(['test_env']))
+        f = lambda: g.assert_has_environments(['test_env', 'foo'])
+        self.assertRaises(CommonV1.InsufficientDataException, f)
+
         assert_valid(self, g.raw)
 
     def test_add_stream(self):
@@ -163,6 +167,10 @@ class TestCommonV1(unittest.TestCase):
 
         g.add_stream('my_stream', 'eyetracker', [1, 2, 3, 4, 5])
         self.assertIn('my_stream', g.get_stream_names())
+
+        self.assertTrue(g.has_streams(['my_stream']))
+        f = lambda: g.assert_has_streams(['my_stream', 'foo'])
+        self.assertRaises(CommonV1.InsufficientDataException, f)
 
         assert_valid(self, g.raw)
 

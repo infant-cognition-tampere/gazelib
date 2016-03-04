@@ -23,6 +23,9 @@ class CommonV1(object):
     class InvalidEventException(Exception):
         pass
 
+    class InsufficientDataException(Exception):
+        pass
+
     # JSON Schema to validate raw input
     # For grammar,
     # see http://json-schema.org/latest/json-schema-validation.html
@@ -128,6 +131,24 @@ class CommonV1(object):
         '''
         return DeepDiff(self.raw, other.raw) == {}
 
+    # Assertions
+
+    def assert_has_environments(self, env_names):
+        if not self.has_environments(env_names):
+            required = ', '.join(env_names)
+            available = ', '.join(self.get_environment_names())
+            msg = 'Environments ' + required + ' are needed but only ' + \
+                available + ' are available.'
+            raise CommonV1.InsufficientDataException(msg)
+
+    def assert_has_streams(self, stream_names):
+        if not self.has_streams(stream_names):
+            required = ', '.join(stream_names)
+            available = ', '.join(self.get_stream_names())
+            msg = 'Streams ' + required + ' are needed but only ' + \
+                available + ' are available.'
+            raise CommonV1.InsufficientDataException(msg)
+
     # Accessors
 
     def convert_to_global_time(self, relative_time_seconds):
@@ -209,6 +230,34 @@ class CommonV1(object):
         for event in self.raw['events']:
             if tag in event['tags']:
                 yield event
+
+    def has_environments(self, env_names):
+        '''
+        Test if environments are available.
+
+        Parameter:
+            env_names, list of strings
+
+        Return:
+            True, if all the given environments are available.
+            False, otherwise
+        '''
+        available_envs = self.get_environment_names()
+        return all(env in available_envs for env in env_names)
+
+    def has_streams(self, stream_names):
+        '''
+        Test if streams are available.
+
+        Parameter:
+            stream_names, list of strings
+
+        Return:
+            True, if all the given streams are available.
+            False, otherwise
+        '''
+        available_streams = self.get_stream_names()
+        return all(st in available_streams for st in stream_names)
 
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
