@@ -24,6 +24,8 @@ class CommonV1(object):
         pass
 
     # JSON Schema to validate raw input
+    # For grammar,
+    # see http://json-schema.org/latest/json-schema-validation.html
     SCHEMA = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'gazelib/common/v1',
