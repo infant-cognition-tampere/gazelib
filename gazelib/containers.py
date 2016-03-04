@@ -2,7 +2,7 @@
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
-from .validation import has_keys, is_list_of_strings, is_real
+from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
@@ -113,7 +113,6 @@ class CommonV1(object):
         Raises ValidationError if raw_common is not valid gazelib/common/v1
         '''
         validate_jsonschema(raw_common, CommonV1.SCHEMA)
-
 
     def __init__(self, raw_common):
         '''
