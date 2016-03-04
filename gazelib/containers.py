@@ -6,6 +6,7 @@ from .validation import has_keys, is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
+from jsonschema import validate as validate_jsonschema
 
 
 class CommonV1(object):
@@ -22,22 +23,95 @@ class CommonV1(object):
     class InvalidEventException(Exception):
         pass
 
+    # JSON Schema to validate raw input
+    SCHEMA = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'gazelib/common/v1',
+        'type': 'object',
+        'properties': {
+            'schema': {
+                'type': 'string',
+                'pattern': 'gazelib/common/v1'
+            },
+            'global_posix_time': {
+                'type': 'number'
+            },
+            'environment': {
+                'type': 'object',
+                'patternProperties': {
+                    '.+': {}
+                }
+            },
+            'timelines': {
+                'type': 'object',
+                'patternProperties': {
+                    '.+': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'number'
+                        }
+                    }
+                }
+            },
+            'streams': {
+                'type': 'object',
+                'patternProperties': {
+                    '.+': {
+                        'type': 'object',
+                        'properties': {
+                            'timeline': {
+                                'type': 'string'
+                            },
+                            'values': {
+                                'type': 'array'
+                            },
+                            'confidence': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'number',
+                                    'maximum': 1.0,
+                                    'minimum': 0.0
+                                }
+                            }
+                        },
+                        'required': ['timeline', 'values']
+                    }
+                }
+            },
+            'events': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'tags': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string'
+                            }
+                        },
+                        'range': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'number'
+                            }
+                        },
+                        'extra': {}
+                    },
+                    'required': ['tags', 'range']
+                }
+            }
+        },
+        'required': ['schema', 'global_posix_time', 'environment',
+                     'timelines', 'streams', 'events']
+    }
+
     @staticmethod
     def validate(raw_common):
-        keys = [
-            'schema',
-            'global_posix_time',
-            'environment',
-            'timelines',
-            'streams',
-            'events'
-        ]
+        '''
+        Raises ValidationError if raw_common is not valid gazelib/common/v1
+        '''
+        validate_jsonschema(raw_common, CommonV1.SCHEMA)
 
-        if not has_keys(raw_common, keys):
-            raise CommonV1.ValidationException('Keys missing')
-
-        # TODO validate schema value
-        # TODO validate types
 
     def __init__(self, raw_common):
 

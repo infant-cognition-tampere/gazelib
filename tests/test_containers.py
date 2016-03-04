@@ -4,10 +4,17 @@ except ImportError:
     import unittest
 
 from deepdiff import DeepDiff
+
 from pprint import PrettyPrinter
 pp = PrettyPrinter(indent=4)
+
 import gazelib
+from gazelib.containers import CommonV1
+
+import jsonschema
+
 import os
+
 
 def load_sample(sample_name):
     '''
@@ -19,7 +26,39 @@ def load_sample(sample_name):
     full_path = os.path.join(this_dir, 'fixtures', sample_name)
     return gazelib.io.load_json(full_path)
 
+
+def assert_valid(self, common_raw):
+    '''
+    Helper
+    '''
+    try:
+        CommonV1.validate(common_raw)
+    except:
+        self.fail('Invalid raw structure')
+
+
 class TestCommonV1(unittest.TestCase):
+
+    def test_validate(self):
+        raw = load_sample('sample.common.json')
+        subraw = load_sample('subsample.common.json')
+
+        # Ensure fixtures are valid
+        try:
+            CommonV1.validate(raw)
+            CommonV1.validate(subraw)
+        except:
+            self.fail('CommonV1 fixtures seem invalid.')
+
+        # Make invalid modification
+        raw['events'] = 'foo'
+        f = lambda: CommonV1.validate(raw)
+        self.assertRaises(jsonschema.ValidationError, f)
+
+        # Make invalid modification
+        subraw['schema'] = 'foo'
+        f = lambda: CommonV1.validate(subraw)
+        self.assertRaises(jsonschema.ValidationError, f)
 
     def test_slice_by_relative_time(self):
 
@@ -93,6 +132,8 @@ class TestCommonV1(unittest.TestCase):
         g.add_environment('test_env', 123)
         self.assertEqual(g.get_environment('test_env'), 123)
 
+        assert_valid(self, g.raw)
+
     def test_add_stream(self):
 
         raw = load_sample('sample.common.json')
@@ -110,6 +151,8 @@ class TestCommonV1(unittest.TestCase):
         g.add_stream('my_stream', 'eyetracker', [1, 2, 3, 4, 5])
         self.assertIn('my_stream', g.iter_stream_names())
 
+        assert_valid(self, g.raw)
+
     def test_add_event(self):
 
         raw = load_sample('sample.common.json')
@@ -126,3 +169,5 @@ class TestCommonV1(unittest.TestCase):
         g.add_event(['my_tag', 'my_tag2'], 0.0, 1.4)
         l = list(g.iter_events_by_tag('my_tag'))
         self.assertEqual(len(l), 1)
+
+        assert_valid(self, g.raw)
