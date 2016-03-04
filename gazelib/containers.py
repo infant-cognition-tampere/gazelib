@@ -116,7 +116,10 @@ class CommonV1(object):
 
 
     def __init__(self, raw_common):
-
+        '''
+        Raises:
+            ValidationError
+        '''
         CommonV1.validate(raw_common)
         self.raw = raw_common
 
@@ -141,20 +144,68 @@ class CommonV1(object):
         return global_time_seconds - gt
 
     def get_environment(self, env_name):
+        '''
+        Return value of the environment.
+        '''
         return self.raw['environment'][env_name]
 
     def get_global_time(self):
+        '''
+        Return the global reference time as seconds from unix epoch.
+        '''
         return self.raw['global_posix_time']
 
-    def iter_environment_names(self):
-        return self.raw['environment'].keys()
+    def get_relative_start_time(self):
+        '''
+        Find he smallest time in the container as relative time.
+        Can be negative.
+        '''
+        # Min of first elements in timelines
+        tl_1st = [timeline[0] for timeline in self.raw['timelines'].values()]
+        tl_min = min(tl_1st)
 
-    def iter_stream_names(self):
-        return self.raw['streams'].keys()
+        # Min in range of events
+        ev_1st = [ev['range'][0] for ev in self.raw['events']]
+        ev_min = min(ev_1st)
+
+        return min(tl_min, ev_min)
+
+    def get_relative_end_time(self):
+        '''
+        Find the largest time in the container as relative time.
+        Can be negative.
+        '''
+        # Max of last elements in timelines
+        tl_last = [timeline[-1] for timeline in self.raw['timelines'].values()]
+        tl_max = max(tl_last)
+
+        # Max in range of events
+        ev_last = [ev['range'][1] for ev in self.raw['events']]
+        ev_max = max(ev_last)
+
+        return max(tl_max, ev_max)
+
+    def get_duration(self):
+        '''
+        Difference in seconds between the smallest and largest time point.
+        '''
+        return self.get_relative_end_time() - self.get_relative_start_time()
+
+    def get_environment_names(self):
+        '''
+        Return list of names of provided environments.
+        '''
+        return list(self.raw['environment'].keys())
+
+    def get_stream_names(self):
+        '''
+        Return list of names of provided streams.
+        '''
+        return list(self.raw['streams'].keys())
 
     def iter_events_by_tag(self, tag):
         '''
-        Yields events with the tag.
+        Yields those events which have the given tag.
         '''
         for event in self.raw['events']:
             if tag in event['tags']:

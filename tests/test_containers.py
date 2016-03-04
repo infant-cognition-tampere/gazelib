@@ -60,6 +60,18 @@ class TestCommonV1(unittest.TestCase):
         f = lambda: CommonV1.validate(subraw)
         self.assertRaises(jsonschema.ValidationError, f)
 
+    def test_get_start_end_time(self):
+        subraw = load_sample('subsample.common.json')
+        subg = CommonV1(subraw)
+
+        t0 = subg.get_relative_start_time()
+        t1 = subg.get_relative_end_time()
+        dur = subg.get_duration()
+
+        self.assertEqual(t0, -0.5)
+        self.assertEqual(t1, 0.5)
+        self.assertEqual(dur, 1.0)
+
     def test_slice_by_relative_time(self):
 
         raw = load_sample('sample.common.json')
@@ -131,6 +143,7 @@ class TestCommonV1(unittest.TestCase):
 
         g.add_environment('test_env', 123)
         self.assertEqual(g.get_environment('test_env'), 123)
+        self.assertIn('test_env', g.get_environment_names())
 
         assert_valid(self, g.raw)
 
@@ -149,7 +162,7 @@ class TestCommonV1(unittest.TestCase):
         self.assertRaises(isex, f)
 
         g.add_stream('my_stream', 'eyetracker', [1, 2, 3, 4, 5])
-        self.assertIn('my_stream', g.iter_stream_names())
+        self.assertIn('my_stream', g.get_stream_names())
 
         assert_valid(self, g.raw)
 
