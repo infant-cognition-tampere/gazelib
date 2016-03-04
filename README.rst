@@ -23,15 +23,11 @@ With `pip
     $ pip install gazelib
 
 
-
-Usage
-========
-
-API
+Docs
 ======
 
-API docs are available under `docs/
-<https://rawgit.com/infant-cognition-tampere/gazelib/develop/docs/build/>`_.  
+Examples and API docs are available at `http://gazelib.readthedocs.org/
+<http://gazelib.readthedocs.org/>`_.
 
 For developers
 =================
@@ -87,7 +83,7 @@ Follow `instructions to install pyenv
 
 or run comprehensive tests for multiple Python versions listed in ``tox.ini``::
 
-    $ pyenv local 2.6.9 2.7.10 3.1.5 3.2.6 3.3.6 3.4.3 3.5.0
+    $ pyenv local 2.7.10 3.1.5 3.2.6 3.3.6 3.4.3 3.5.0
     $ eval "$(pyenv init -)"
     $ pyenv rehash
     $ tox
@@ -98,6 +94,18 @@ Install new pyenv environments for example by::
 
 Validate README.rst at `http://rst.ninjs.org/
 <http://rst.ninjs.org/>`_
+
+Tox + Travis CI + `Coveralls
+<https://coveralls.io/github/infant-cognition-tampere/gazelib>`_:
+
+- https://www.rfk.id.au/blog/entry/testing-better-coverage-tox/
+- http://coverage.readthedocs.org/en/latest/
+- https://github.com/z4r/python-coveralls
+- https://github.com/ryanhiebert/tox-travis
+- http://jsatt.com/blog/using-tox-with-travis-ci-to-test-django-apps/
+- http://agiliq.com/blog/2014/05/continuous-integration-with-travis-and-coverallsio/
+- https://github.com/openwebinars-django/testango
+
 
 
 Publishing to PyPI
@@ -131,6 +139,9 @@ Version release
 4.  Create tag: ``$ git tag -a 1.2.3 -m "v1.2.3 stable"``
 5.  Push commits and tags: ``$ git push && git push --tags``
 6.  Publish to PyPI. See *4.4. Publishing to PyPI*.
+
+See also `a successful Git branching model
+<http://nvie.com/posts/a-successful-git-branching-model/>`_.
 
 
 Compile documentation

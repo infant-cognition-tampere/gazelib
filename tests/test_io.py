@@ -4,7 +4,6 @@ except ImportError:
     import unittest
 
 import gazelib
-from numpy import testing as nptest  # to assert almost equal lists
 import os
 
 class TestIO(unittest.TestCase):

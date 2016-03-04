@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Gazelib, a toolkit for gaze analysis.
 '''

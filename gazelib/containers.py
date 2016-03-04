@@ -1,10 +1,12 @@
+# -*- coding: utf-8 -*-
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
-from .validation import has_keys, is_list_of_strings, is_real, ValidationException
+from .validation import has_keys, is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
+from jsonschema import validate as validate_jsonschema
 
 
 class CommonV1(object):
@@ -21,21 +23,94 @@ class CommonV1(object):
     class InvalidEventException(Exception):
         pass
 
+    # JSON Schema to validate raw input
+    SCHEMA = {
+        '$schema': 'http://json-schema.org/draft-04/schema#',
+        'title': 'gazelib/common/v1',
+        'type': 'object',
+        'properties': {
+            'schema': {
+                'type': 'string',
+                'pattern': 'gazelib/common/v1'
+            },
+            'global_posix_time': {
+                'type': 'number'
+            },
+            'environment': {
+                'type': 'object',
+                'patternProperties': {
+                    '.+': {}
+                }
+            },
+            'timelines': {
+                'type': 'object',
+                'patternProperties': {
+                    '.+': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'number'
+                        }
+                    }
+                }
+            },
+            'streams': {
+                'type': 'object',
+                'patternProperties': {
+                    '.+': {
+                        'type': 'object',
+                        'properties': {
+                            'timeline': {
+                                'type': 'string'
+                            },
+                            'values': {
+                                'type': 'array'
+                            },
+                            'confidence': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'number',
+                                    'maximum': 1.0,
+                                    'minimum': 0.0
+                                }
+                            }
+                        },
+                        'required': ['timeline', 'values']
+                    }
+                }
+            },
+            'events': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'tags': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string'
+                            }
+                        },
+                        'range': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'number'
+                            }
+                        },
+                        'extra': {}
+                    },
+                    'required': ['tags', 'range']
+                }
+            }
+        },
+        'required': ['schema', 'global_posix_time', 'environment',
+                     'timelines', 'streams', 'events']
+    }
+
+    @staticmethod
     def validate(raw_common):
-        keys = [
-          'schema',
-          'global_posix_time',
-          'environment',
-          'timelines',
-          'streams',
-          'events'
-        ]
-
-        if not has_keys(raw_common, keys):
-            raise CommonV1.ValidationException('Keys missing')
-
-        # TODO validate schema value
-        # TODO validate types
+        '''
+        Raises ValidationError if raw_common is not valid gazelib/common/v1
+        '''
+        validate_jsonschema(raw_common, CommonV1.SCHEMA)
 
 
     def __init__(self, raw_common):
@@ -52,13 +127,13 @@ class CommonV1(object):
     # Accessors
 
     def convert_to_global_time(self, relative_time_seconds):
-        if relative_time_seconds == None:
+        if relative_time_seconds is None:
             return None
         gt = self.raw['global_posix_time']
         return gt + relative_time_seconds
 
     def convert_to_relative_time(self, global_time_seconds):
-        if global_time_seconds == None:
+        if global_time_seconds is None:
             return None
         gt = self.raw['global_posix_time']
         return global_time_seconds - gt
@@ -86,7 +161,7 @@ class CommonV1(object):
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
-          Does not update global_posix_time because easier implementation
+        Does not update global_posix_time because easier implementation.
         '''
 
         # The new copy
@@ -160,15 +235,14 @@ class CommonV1(object):
 
         return CommonV1(slice_raw)
 
-
     def slice_by_global_time(self, start_time, end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
-          Updates the global_posix_time to start_time
-            to minimize representation size.
+            Updates the global_posix_time to start_time
+                to minimize representation size.
         '''
         r_start = self.convert_to_relative_time(start_time)
-        r_end   = self.convert_to_relative_time(end_time)
+        r_end = self.convert_to_relative_time(end_time)
 
         return self.slice_by_relative_time(r_start, r_end)
 
@@ -178,10 +252,11 @@ class CommonV1(object):
         by the indices of the timeline.
 
         Parameters
-          timeline_name
-          start_index, inclusive
-          end_index (optional), exclusive, first element to not be included.
-            if None given, slice to the end
+            timeline_name
+            start_index: inclusive
+            end_index: optional, exclusive, first element to not be included.
+                If None given, slice to the end.
+
         '''
         timelines = self.raw['timelines']
 
@@ -228,15 +303,15 @@ class CommonV1(object):
         for event in self.raw['events']:
             if tag in event['tags']:
                 if index == i:
-                     target_event = event
-                     break
+                    target_event = event
+                    break
                 i += 1
 
         if target_event is None:
             return None
 
         range_start = target_event['range'][0]
-        range_end   = target_event['range'][1]
+        range_end = target_event['range'][1]
 
         return self.slice_by_relative_time(range_start, range_end)
 
@@ -257,7 +332,7 @@ class CommonV1(object):
 
         for index, event in enumerate(self.iter_events_by_tag(tag)):
             range_start = event['range'][0]
-            range_end   = event['range'][1]
+            range_end = event['range'][1]
             yield self.slice_by_relative_time(range_start, range_end)
             if limit_to is not None:
                 if index + 2 > limit_to:
