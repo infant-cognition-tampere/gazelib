@@ -23,15 +23,11 @@ With `pip
     $ pip install gazelib
 
 
-
-Usage
-========
-
-API
+Docs
 ======
 
-API docs are available under `docs/
-<https://rawgit.com/infant-cognition-tampere/gazelib/develop/docs/build/>`_.
+Examples and API docs are available at `http://gazelib.readthedocs.org/
+<http://gazelib.readthedocs.org/>`_.
 
 For developers
 =================
