@@ -4,6 +4,7 @@ Classes that store the gaze data and can be fed to analysis functions.
 '''
 from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
+from .io import load_json, write_json
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
@@ -118,14 +119,24 @@ class CommonV1(object):
         '''
         validate_jsonschema(raw_common, CommonV1.SCHEMA)
 
-    def __init__(self, raw_common=None):
+    def __init__(self, raw_common_or_filepath=None):
         '''
+        Parameters:
+            raw_common_or_filepath:
+                Optional. A dict formatted in gazelib/common/v1
+                or a string path to a source file.
+                Supported source file types:
+                - JSON
+
         Raises:
             ValidationError
         '''
-        if raw_common is None:
+
+        r = raw_common_or_filepath  # alias
+
+        if r is None:
             # Construct with empty.
-            raw_common = {
+            r = {
                 'schema': 'gazelib/common/v1',
                 'global_posix_time': get_current_posix_time(),
                 'environment': {},
@@ -133,10 +144,14 @@ class CommonV1(object):
                 'streams': {},
                 'events': []
             }
+        elif isinstance(r, str):
+            # Load file
+            r = load_json(r)
+            CommonV1.validate(r)
         else:
-            CommonV1.validate(raw_common)
+            CommonV1.validate(r)
 
-        self.raw = raw_common
+        self.raw = r
 
     def __eq__(self, other):
         '''
@@ -508,3 +523,11 @@ class CommonV1(object):
         '''
         # TODO validate
         self.raw['global_posix_time'] = seconds_from_epoch
+
+    # IO
+
+    def save_as_json(self, target_file_path):
+        '''
+        Store the content in gazelib/common/v1 in a JSON file.
+        '''
+        write_json(target_file_path, self.raw)

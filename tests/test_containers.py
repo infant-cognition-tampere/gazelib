@@ -14,49 +14,70 @@ from gazelib.containers import CommonV1
 import jsonschema
 
 import os
+import tempfile
 
+def get_sample_filepath(sample_name):
+    '''
+    Create absolute filepath from sample filename.
+    '''
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    full_path = os.path.join(this_dir, 'fixtures', sample_name)
+    return full_path
+
+def get_temp_filepath(file_name):
+    '''
+    Generate filepath for a file that is needed only briefly.
+    '''
+    # Absolute path to temp dir.
+    p = tempfile.mkdtemp()
+    return os.path.join(p, file_name)
+
+def remove_temp_file(abs_filepath):
+    '''
+    Remove file created by the tempfile.mkdtemp
+    Warning! Is capable to remove any file and its directory.
+    '''
+    d = os.path.dirname(abs_filepath)
+    os.remove(abs_filepath)
+    os.rmdir(d)
 
 def load_sample(sample_name):
     '''
     Reads from fixtures/ directory
     Access e.g. by: load_sample('sample.common.json')
     '''
-
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    full_path = os.path.join(this_dir, 'fixtures', sample_name)
+    full_path = get_sample_filepath(sample_name)
     return gazelib.io.load_json(full_path)
 
 
-def assert_valid(self, common_raw):
+def assert_valid(self, common_raw, msg='Invalid CommonV1 structure'):
     '''
-    Helper
+    Assert given dict is valid gazelib/common/v1
     '''
     try:
         CommonV1.validate(common_raw)
     except:
-        self.fail('Invalid raw structure')
+        self.fail(msg)
 
 
 class TestCommonV1(unittest.TestCase):
 
     def test_empty_init(self):
         c = CommonV1()
+        assert_valid(self, c.raw, 'CommonV1 default structure is invalid.')
 
-        try:
-            CommonV1.validate(c.raw)
-        except:
-            self.fail('CommonV1 default empty structure is invalid.')
+    def test_init_with_file(self):
+        fpath = get_sample_filepath('sample.common.json')
+        c = CommonV1(fpath)
+        assert_valid(self, c.raw)
 
     def test_validate(self):
         raw = load_sample('sample.common.json')
         subraw = load_sample('subsample.common.json')
 
         # Ensure fixtures are valid
-        try:
-            CommonV1.validate(raw)
-            CommonV1.validate(subraw)
-        except:
-            self.fail('CommonV1 fixtures seem invalid.')
+        assert_valid(self, raw)
+        assert_valid(self, subraw)
 
         # Make invalid modification
         raw['events'] = 'foo'
@@ -200,3 +221,17 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(l), 1)
 
         assert_valid(self, g.raw)
+
+    def test_save_as_json(self):
+
+        fpath = get_temp_filepath('myfile.json')
+        c = CommonV1()
+        c.add_environment('test', 'hello')
+        c.save_as_json(fpath)
+
+        cc = CommonV1(fpath)
+        self.assertTrue(cc.has_environments(['test']))
+
+        self.assertTrue(os.path.exists(fpath))
+        remove_temp_file(fpath)
+        self.assertFalse(os.path.exists(fpath))
