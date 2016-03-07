@@ -12,11 +12,10 @@ Contents:
    :maxdepth: 2
 
    gazelib
-   modules
 
 Lots of eyetracker data to be managed? No common schema for the data? Tired of rewriting your analysis scripts for each project? Gazelib will help you!
 
-For the available tools, check out the API reference. 
+For the available tools, check out the API reference.
 
 Indices and tables
 ==================
