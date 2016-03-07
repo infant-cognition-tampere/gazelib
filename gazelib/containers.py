@@ -13,6 +13,15 @@ from jsonschema import validate as validate_jsonschema
 
 class CommonV1(object):
 
+    class InvalidRangeException(Exception):
+        '''
+        Raised if invalid range index pair were given. E.g. start > end
+        '''
+        pass
+
+    class MissingEnvironmentException(Exception):
+        pass
+
     class MissingTimelineException(Exception):
         pass
 
@@ -177,6 +186,17 @@ class CommonV1(object):
                 available + ' are available.'
             raise CommonV1.InsufficientDataException(msg)
 
+    def assert_range_order(self, start, end, start_name, end_name):
+        '''
+        Raise InvalidRangeException if start larger or equal than end.
+        '''
+        # Ensure correct order
+        if start is not None and end is not None:
+            if start >= end:
+                msg = (start_name + ' (' + str(start) + ') must be ' +
+                       'smaller than ' + end_name + ' (' + str(end) + ')')
+                raise CommonV1.InvalidRangeException(msg)
+
     # Accessors
 
     def convert_to_global_time(self, relative_time_seconds):
@@ -195,7 +215,23 @@ class CommonV1(object):
         '''
         Return value of the environment.
         '''
-        return self.raw['environment'][env_name]
+        try:
+            return self.raw['environment'][env_name]
+        except KeyError:
+            str_e = str(env_name)
+            msg = 'Environment ' + str_e + ' not found.'
+            raise CommonV1.MissingEnvironmentException(msg)
+
+    def get_timeline(self, timeline_name):
+        '''
+        Return timeline i.e. a list of relative times.
+        '''
+        try:
+            return self.raw['timelines'][timeline_name]
+        except KeyError:
+            str_tl = str(timeline_name)
+            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
+                                                    ' not found.')
 
     def get_global_time(self):
         '''
@@ -293,6 +329,10 @@ class CommonV1(object):
         Does not update global_posix_time because easier implementation.
         '''
 
+        # Ensure correct order
+        self.assert_range_order(rel_start_time, rel_end_time,
+                                'rel_start_time', 'rel_end_time')
+
         # The new copy
         slice_raw = {
             'schema': self.raw['schema'],
@@ -307,7 +347,7 @@ class CommonV1(object):
 
             # Find indices from the original timeline
             tl_name = stream['timeline']
-            tl = self.raw['timelines'][tl_name]
+            tl = self.get_timeline(tl_name)  # Raises if not found
             first_i = bisect_left(tl, rel_start_time)  # first in range
             if rel_end_time is None:
                 end_i = None
@@ -370,6 +410,11 @@ class CommonV1(object):
             Updates the global_posix_time to start_time
                 to minimize representation size.
         '''
+
+        # Ensure correct order
+        self.assert_range_order(start_time, end_time,
+                                'start_time', 'end_time')
+
         r_start = self.convert_to_relative_time(start_time)
         r_end = self.convert_to_relative_time(end_time)
 
@@ -387,14 +432,12 @@ class CommonV1(object):
                 If None given, slice to the end.
 
         '''
-        timelines = self.raw['timelines']
 
-        # Ensure timeline exists
-        if timeline_name not in timelines:
-            str_tl = str(timeline_name)
-            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
-                                                    ' not found.')
-        timeline = timelines[timeline_name]
+        # Ensure correct order
+        self.assert_range_order(start_index, end_index,
+                                'start_index', 'end_index')
+
+        timeline = self.get_timeline(timeline_name)
 
         # Limit indices
         last_index = len(timeline) - 1

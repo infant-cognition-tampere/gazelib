@@ -61,13 +61,13 @@ def load_csv_as_dictlist(filename, delimit='\t'):
     return rows
 
 
-def write_dictlist_as_csv(dictlist, target_filename):
+def write_dictlist_as_csv(target_filename, dictlist, delimit='\t'):
     keys = dictlist[0].keys()
     with open(target_filename, 'w') as csvfile:
         fieldnames = keys
         writer = csv.DictWriter(csvfile,
                                 fieldnames=fieldnames,
-                                dialect='excel')
+                                delimiter=delimit)
         writer.writeheader()
         for d in dictlist:
             writer.writerow(d)

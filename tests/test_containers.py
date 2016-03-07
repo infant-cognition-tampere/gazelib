@@ -11,10 +11,9 @@ pp = PrettyPrinter(indent=4)
 import gazelib
 from gazelib.containers import CommonV1
 
+from .utils import get_temp_filepath, remove_temp_file
 import jsonschema
-
 import os
-import tempfile
 
 def get_sample_filepath(sample_name):
     '''
@@ -23,23 +22,6 @@ def get_sample_filepath(sample_name):
     this_dir = os.path.dirname(os.path.realpath(__file__))
     full_path = os.path.join(this_dir, 'fixtures', sample_name)
     return full_path
-
-def get_temp_filepath(file_name):
-    '''
-    Generate filepath for a file that is needed only briefly.
-    '''
-    # Absolute path to temp dir.
-    p = tempfile.mkdtemp()
-    return os.path.join(p, file_name)
-
-def remove_temp_file(abs_filepath):
-    '''
-    Remove file created by the tempfile.mkdtemp
-    Warning! Is capable to remove any file and its directory.
-    '''
-    d = os.path.dirname(abs_filepath)
-    os.remove(abs_filepath)
-    os.rmdir(d)
 
 def load_sample(sample_name):
     '''
@@ -89,6 +71,18 @@ class TestCommonV1(unittest.TestCase):
         f = lambda: CommonV1.validate(subraw)
         self.assertRaises(jsonschema.ValidationError, f)
 
+    def test_global_and_relative_time_with_none(self):
+        c = CommonV1(get_sample_filepath('sample.common.json'))
+
+        gt = c.get_global_time()
+
+        t = c.convert_to_global_time(5.0);
+        self.assertEqual(t - 5.0, gt)
+        self.assertEqual(c.convert_to_relative_time(t), 5.0)
+
+        self.assertIsNone(c.convert_to_global_time(None))
+        self.assertIsNone(c.convert_to_relative_time(None))
+
     def test_get_start_end_time(self):
         subraw = load_sample('subsample.common.json')
         subg = CommonV1(subraw)
@@ -119,7 +113,10 @@ class TestCommonV1(unittest.TestCase):
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
-        sliceg = g.slice_by_global_time(1234567890.05, 1234567890.11)
+        gt1 = g.convert_to_global_time(0.05)
+        gt2 = g.convert_to_global_time(0.11)
+
+        sliceg = g.slice_by_global_time(gt1, gt2)
 
         dd = DeepDiff(sliceg.raw, subg.raw)
         self.assertEqual(dd, {})
@@ -130,6 +127,14 @@ class TestCommonV1(unittest.TestCase):
         subraw = load_sample('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
+
+        # Test invalid timeline
+        f = lambda: g.slice_by_timeline('foo', 5)
+        self.assertRaises(CommonV1.MissingTimelineException, f)
+
+        # Test invalid end index
+        f = lambda: g.slice_by_timeline('ecg', 5, 4)
+        self.assertRaises(CommonV1.InvalidRangeException, f)
 
         sliceg = g.slice_by_timeline('ecg', 5)
 
@@ -146,9 +151,12 @@ class TestCommonV1(unittest.TestCase):
         subg = gazelib.containers.CommonV1(subraw)
 
         sliceg = g.slice_by_tag('test/last-half')
-
         dd = DeepDiff(subg.raw, sliceg.raw)
         self.assertEqual(dd, {})
+
+        # Reference by index
+        slicec = g.slice_by_tag('test/center', index=1)
+        self.assertEqual(len(slicec.get_timeline('eyetracker')), 1)
 
     def test_iter_slices_by_tag(self):
 
