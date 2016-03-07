@@ -1,16 +1,21 @@
-# gazelib: A low level library for analyzing gaze-data files provided
-# usually by eyetracker-devices.
-# Gaze-data is expected to be in JSON-format such as list of
-# datapoints with similar dict storing the properties for each point. Example:
-# [{xcoordinate:0.4, ...}, {xcoordinate:0.5, ...}, ..., {xcoordinate:-1, ...}]
-# List elements are called "gazepoints", and dict keys as "keys".
-#
-# gazelib-library is designed to be used with a script file
-# that calls the library functions to perform different analysis steps.
-#
-# Created by researchers in Infant Cognition Lab,
-# University of Tampere, Finland
+'''
+igazelib: A low level library for analyzing gaze-data files provided usually
+by eyetracker-devices.
 
+Gaze data is expected to be in JSON-format such as list of datapoints with
+similar dict storing the properties for each point.
+
+Example:
+  [{xcoordinate:0.4, ...}, {xcoordinate:0.5, ...}, ..., {xcoordinate:-1, ...}]
+
+List elements are called "gazepoints", and dict keys as "keys".
+
+gazelib-library is designed to be used with a script file that calls
+the library functions to perform different analysis steps.
+
+Created by researchers in Infant Cognition Lab,
+University of Tampere, Finland
+'''
 
 indent = "  "
 
@@ -37,7 +42,9 @@ def mean(lst):
     return float(sum(lst)) / len(lst) if len(lst) > 0 else float('nan')
 
 def first_gazepoints_by_time(data, time_key, timeunits):
-    # Clip first rows from DATA before milliseconds count of time has passed
+    '''
+    Clip first rows from DATA before milliseconds count of time has passed
+    '''
 
     print("Picking first " + str(timeunits) + " timeunit gazepoints from data...")
     print(indent + "List contains " + str(len(data)) + " gazepoints before operation.")
@@ -50,7 +57,9 @@ def first_gazepoints_by_time(data, time_key, timeunits):
 
 
 def first_gazepoints(data, gpcount):
-    # Clip first rows from DATA before milliseconds count of time has passed
+    '''
+    Clip first rows from DATA before milliseconds count of time has passed
+    '''
 
     print("Picking first " + str(gpcount) + " gazepoints from data...")
     print(indent + "List contains " + str(len(data)) + " gazepoints before operation.")
@@ -62,7 +71,9 @@ def first_gazepoints(data, gpcount):
 
 
 def gazepoints_after_time(data, time_key, timeunits):
-    # Clip rows from DATA after [timeunits] count of time has passed
+    '''
+    Clip rows from DATA after [timeunits] count of time has passed
+    '''
 
     print("Picking gazepoints after " + str(timeunits) + " timeunits from data using TETTime...")
     print(indent + "List contains " + str(len(data)) + " gazepoints before operation.")
@@ -78,7 +89,9 @@ def gazepoints_after_time(data, time_key, timeunits):
 
 
 def gazepoints_containing_value(data, key, value_list):
-    # return the rows that contain certain value
+    '''
+    return the rows that contain certain value
+    '''
 
     print("Picking gazepoints with values " + str(value_list) + " assosiated with key " + str(key))
     print(indent + "List contains " + str(len(data)) + " gazepoints before operation.")
@@ -94,7 +107,9 @@ def gazepoints_containing_value(data, key, value_list):
 
 
 def gazepoints_not_containing_value(data, key, value_list):
-    # return the rows that DO NOT contain certain value
+    '''
+    return the rows that DO NOT contain certain value
+    '''
 
     print("Picking gazepoints without values " + str(value_list) + " assosiated with key " + str(key))
     print(indent + "List contains " + str(len(data)) + " gazepoints.")
@@ -110,9 +125,11 @@ def gazepoints_not_containing_value(data, key, value_list):
 
 
 def split_at_change_in_value(data, key):
-    # Split one list to multiple lists. New list is started each time when
-    # value in the column changes from previous one. Omitted on the case of
-    # first element.
+    '''
+    Split one list to multiple lists. New list is started each time when
+    value in the column changes from previous one. Omitted on the case of
+    first element.
+    '''
 
     # return list of lists
     print("Splitting data when change in value for key: " + str(key))
@@ -144,13 +161,17 @@ def split_at_change_in_value(data, key):
 
 
 def get_value(data, gazepoint, key):
-    # Returns a value from specific datapoint with specific key.
+    '''
+    Returns a value from specific datapoint with specific key.
+    '''
 
     return data[gazepoint][key]
 
 
 def replace_value(data, key, value_to_replace, value):
-    # replaces all values value_to_replace on key with value.
+    '''
+    replaces all values value_to_replace on key with value.
+    '''
 
     print("Replacing values for key:" + str(key) + " with value " + str(value_to_replace))
     new_values = [value if gp[key] == value_to_replace else gp[key] for gp in data]
@@ -162,7 +183,9 @@ def replace_value(data, key, value_to_replace, value):
 
 
 def border_violation(data, aoi, xkey, ykey, valkey, accepted_validities):
-    # Return true if during-non valid perioid gaze has crossed aoi-border.
+    '''
+    Return true if during-non valid perioid gaze has crossed aoi-border.
+    '''
 
     print("Calculating if a gaze moved over aoi border during invalid data...")
 
@@ -196,7 +219,12 @@ def border_violation(data, aoi, xkey, ykey, valkey, accepted_validities):
 
 
 def inside_aoi(aoi, x, y):
-    # If coordinates are inside aoi, return true, otherwise false.
+    '''
+    If coordinates are inside aoi, return true, otherwise false.
+    Aoi is expected to be a dict with keys "x1", "x2", "y1", "y2".
+    Aoi represents an rectangle with top-left corner at (x1, y1) and
+    bottom-right corner at (x2, y2).
+    '''
 
     if (aoi["x1"] < x  and x < aoi["x2"]) and (aoi["y1"] < y and y < aoi["y2"]):
         return True
@@ -205,7 +233,9 @@ def inside_aoi(aoi, x, y):
 
 
 def combine_coordinates(data, accepted_validities, rxkey, rykey, rvalkey, lxkey, lykey, lvalkey):
-    # Combine two coordinate-columns with third validity-column to one column.
+    '''
+    Combine two coordinate-columns with third validity-column to one column.
+    '''
 
     print("Combining two columns...")
 
@@ -224,8 +254,10 @@ def combine_coordinates(data, accepted_validities, rxkey, rykey, rvalkey, lxkey,
 
 
 def add_key(data, key, new_values):
-    # Adds a key to the datapoint-list. New_values must match in length to
-    # the column with keys.
+    '''
+    Adds a key to the datapoint-list. New_values must match in length to
+    the column with keys.
+    '''
 
     #print "Adding " + key + "-key to dataset.."
 
@@ -240,7 +272,9 @@ def add_key(data, key, new_values):
 
 
 def get_key(data, key):
-    # Returns a list of values, from single key in the data-parameter.
+    '''
+    Returns a list of values, from single key in the data-parameter.
+    '''
 
     #print "Getting data from key " + str(key) + "..."
 
@@ -254,9 +288,11 @@ def get_key(data, key):
 
 
 def median_filter_data(data, winlen, key):
-    # Performs median filtering to the datapoints in the specified column on
-    # DATA-structure. Further information see help medianFilter.
-    # Column specifies the column to filter the data with
+    '''
+    Performs median filtering to the datapoints in the specified column on
+    DATA-structure. Further information see help medianFilter.
+    Column specifies the column to filter the data with.
+    '''
 
     new_data = add_key(data, key, median_filter(get_key(data, key), winlen))
 
@@ -264,12 +300,14 @@ def median_filter_data(data, winlen, key):
 
 
 def median_filter(datapoints, winlen):
-    # Performs median filtering to the datapoints with window-length winlen.
-    # Winlen must be an odd integer
-    # (window: sample-(winlen-1)/2..sample..sample+(winlen-1)/2.
-    # Endings of the sample are truncated by the first/last sample to achieve
-    # filtered trace of same length than the original.
-    # Here datapoints must contain numbers, otherwise an error is presented.
+    '''
+    Performs median filtering to the datapoints with window-length winlen.
+    Winlen must be an odd integer
+    (window: sample-(winlen-1)/2..sample..sample+(winlen-1)/2.
+    Endings of the sample are truncated by the first/last sample to achieve
+    filtered trace of same length than the original.
+    Here datapoints must contain numbers, otherwise an error is presented.
+    '''
 
     datapoints = list(map(float, datapoints))
 
@@ -295,12 +333,14 @@ def median_filter(datapoints, winlen):
 
 
 def interpolate_using_last_good_value(data, key, valkey, accepted_validities):
-    # Interpolates values with key "key" in DATA-matrix by replacing the bad
-    # value with last good value before bad values (if there is at least one good
-    # value, otherwise, do nothing). Validitycolumn contains the validity markings
-    # for each datapoint and good validities are defined by the accepted
-    # validities-parameter. If the beginning of a trail is "bad", use the first
-    # appearing good value to interpolate that.
+    '''
+    Interpolates values with key "key" in DATA-matrix by replacing the bad
+    value with last good value before bad values (if there is at least one good
+    value, otherwise, do nothing). Validitycolumn contains the validity markings
+    for each datapoint and good validities are defined by the accepted
+    validities-parameter. If the beginning of a trail is "bad", use the first
+    appearing good value to interpolate that.
+    '''
 
     print("Interpolating values + " + key + ": using last good (or first good) value...")
 
@@ -335,8 +375,10 @@ def interpolate_using_last_good_value(data, key, valkey, accepted_validities):
 
 
 def gaze_inside_aoi(data, xcol, ycol, aoi, firstorlast):
-    # Finds either the first row when gaze enters aoi or last.
-    # If gaze does not enter aoi, return -1
+    '''
+    Finds either the first row when gaze enters aoi or last.
+    If gaze does not enter aoi, return -1
+    '''
 
     print("Calculating when gaze inside aoi: " + str(aoi) + " " + firstorlast + "time...")
 
@@ -354,7 +396,9 @@ def gaze_inside_aoi(data, xcol, ycol, aoi, firstorlast):
 
 
 def gaze_inside_aoi_percentage(data, xcol, ycol, aoi):
-    # calculate the percentage of gaze inside aoi borders on given data.
+    '''
+    Calculate the percentage of gaze inside aoi borders on given data.
+    '''
 
     print("Calculating when the portion of gaze inside aoi: " + str(aoi))
 
@@ -373,7 +417,7 @@ def gaze_inside_aoi_percentage(data, xcol, ycol, aoi):
 
 
 def longest_non_valid_streak(data, valkey, timekey, accepted_validities):
-    # Longest streak of non valid values
+    '''Longest streak of non valid values'''
 
     print("Calculating longest non-valid streak...")
 
@@ -402,7 +446,7 @@ def longest_non_valid_streak(data, valkey, timekey, accepted_validities):
 
 
 def valid_gaze_percentage(data, valkey, accepted_validities):
-    # Calculates the percentage of valid gaze in data.
+    '''Calculates the percentage of valid gaze in data.'''
 
     if len(data) == 0:
         return -1
@@ -417,7 +461,7 @@ def valid_gaze_percentage(data, valkey, accepted_validities):
 
 
 def duration(data, timekey):
-    # returns the length of the data in time units
+    '''Returns the length of the data in time units.'''
 
     if len(data) == 0:
         return -1
@@ -428,7 +472,7 @@ def duration(data, timekey):
 
 
 def SRT_index(rtimes, max_rt, min_rt):
-    # calculate SRT index (Leppanen et al.)
+    '''calculate SRT index (Leppanen et al.)'''
 
     SRTs = []
 
@@ -439,9 +483,11 @@ def SRT_index(rtimes, max_rt, min_rt):
 
 
 def group(data, group_key, value_key):
-    # Groups a list of datapoint-dicts so that one of the keys is used as
-    #"grouping key" - according to this the values specified by "value key" are
-    # sorted to the dict containing lists.
+    '''
+    Groups a list of datapoint-dicts so that one of the keys is used as
+    "grouping key" - according to this the values specified by "value key" are
+    sorted to the dict containing lists.
+    '''
 
     datas_by_group = {}
     for datapoint in data:
@@ -459,10 +505,12 @@ def group(data, group_key, value_key):
 
 
 def group_lists(datas, group_key):
-    # Groups data by 0'th value in group_column and places each subset to a group
-    # defined by group_column.
-    # parameter: list of datas (data:list of rows), grouping key
-    # value in datapoint[0][group_key] expected to exist
+    '''
+    Groups data by 0'th value in group_column and places each subset to a group
+    defined by group_column.
+    parameter: list of datas (data:list of rows), grouping key
+    value in datapoint[0][group_key] expected to exist
+    '''
 
     datas_by_group = {}
     for data in datas:
@@ -478,8 +526,10 @@ def group_lists(datas, group_key):
 
 
 def mean_of_valid_values(values, validities, accepted_validities):
-    # Returns mean of good validity tagged values. If none, returns -1.
-    # values: list, validities:list
+    '''
+    Returns mean of good validity tagged values. If none, returns -1.
+    values: list, validities:list
+    '''
 
     goodvalues = []
 
