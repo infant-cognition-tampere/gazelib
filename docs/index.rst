@@ -18,10 +18,11 @@ Contents:
 See also
 --------
 
-- `gazelib at GitHub
-<https://github.com/infant-cognition-tampere/gazelib>`_
-- `gazelib at PyPI
-<https://pypi.python.org/pypi/gazelib>`_
+- gazelib at GitHub_
+- gazelib at PyPI_
+
+.. _GitHub: https://github.com/infant-cognition-tampere/gazelib
+.. _PyPI: https://pypi.python.org/pypi/gazelib
 
 
 Indices and tables
@@ -30,3 +31,12 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Other versions
+==============
+
+- master_
+- develop_
+
+.. _master: http://gazelib.readthedocs.org/en/master/
+.. _develop: http://gazelib.readthedocs.org/en/develop/
