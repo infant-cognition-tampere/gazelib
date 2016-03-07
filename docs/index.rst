@@ -26,14 +26,14 @@ See also
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
 
 Other versions
-==============
+--------------
 
 - master_
 - develop_
