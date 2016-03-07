@@ -12,7 +12,9 @@ The Python package *gazelib* provides software tools to manage and analyze gaze 
   :target: https://travis-ci.org/infant-cognition-tampere/gazelib
 .. image:: https://coveralls.io/repos/infant-cognition-tampere/gazelib/badge.svg?branch=master&service=github
   :target: https://coveralls.io/github/infant-cognition-tampere/gazelib?branch=master
-
+.. image:: https://readthedocs.org/projects/gazelib/badge/
+  :target: http://gazelib.readthedocs.org/en/latest/
+  :alt: Documentation Status
 
 Install
 ==========
@@ -147,8 +149,14 @@ See also `a successful Git branching model
 Compile documentation
 ---------------------
 
-1.  ``$ sphinx-apidoc -o docs gazelib``
-2.  ``$ make -C docs html``
+Run ``$ make -C docs html``
+
+This will execute ``$ sphinx-apidoc -o docs gazelib`` automatically.
+
+ReadTheDocs.org builds the documentation automatically after push to GitHub.
+
+Manage ReadTheDocs build at `readthedocs.org/projects/gazelib
+<https://readthedocs.org/projects/gazelib/>`_.
 
 
 Versioning

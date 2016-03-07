@@ -21,6 +21,55 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 
+# From ReadTheDocs.org:
+# http://read-the-docs.readthedocs.org/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules
+# If you experience import errors on libraries that depend on C modules:
+# Another use case for this is when you have a module with a C extension.
+# This happens because our build system doesn’t have the dependencies for
+# building your project. This happens with things like libevent and mysql,
+# and other python things that depend on C libraries. We can’t support
+# installing random C binaries on our system, so there is another way to fix
+# these imports.
+# You can mock out the imports for these modules in your conf.py with the
+# following snippet:
+### Snippet begin ###
+#from unittest.mock import MagicMock
+#
+#class Mock(MagicMock):
+#    @classmethod
+#    def __getattr__(cls, name):
+#        return Mock()
+#
+#MOCK_MODULES = ['jsonschema']
+#sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+### Snippet end ###
+
+# ReadTheDocs.org do not support sphinx-apidoc out of the box.
+# That requires developer to run sphinx-apidoc manually.
+# An automatic workaround has been presented at:
+#   https://github.com/rtfd/readthedocs.org/issues/1139
+# The following two functions are run automatically and
+# as a result, apidocs are generated.
+# This snippet is directly from one of the replies.
+### Snippet begin ###
+import subprocess
+
+def run_apidoc(_):
+    modules = ['../gazelib']
+    for module in modules:
+        cur_dir = os.path.abspath(os.path.dirname(__file__))
+        output_path = os.path.join(cur_dir)
+        cmd_path = 'sphinx-apidoc'
+        if hasattr(sys, 'real_prefix'):
+            # Check to see if we are in a virtualenv
+            # If we are, assemble the path manually
+            cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
+        subprocess.check_call([cmd_path, '--separate', '-o', output_path, module, '--force'])
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
+### Snippet end ###
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

@@ -11,44 +11,55 @@ pp = PrettyPrinter(indent=4)
 import gazelib
 from gazelib.containers import CommonV1
 
+from .utils import get_temp_filepath, remove_temp_file
 import jsonschema
-
 import os
 
+def get_sample_filepath(sample_name):
+    '''
+    Create absolute filepath from sample filename.
+    '''
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    full_path = os.path.join(this_dir, 'fixtures', sample_name)
+    return full_path
 
 def load_sample(sample_name):
     '''
     Reads from fixtures/ directory
     Access e.g. by: load_sample('sample.common.json')
     '''
-
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    full_path = os.path.join(this_dir, 'fixtures', sample_name)
+    full_path = get_sample_filepath(sample_name)
     return gazelib.io.load_json(full_path)
 
 
-def assert_valid(self, common_raw):
+def assert_valid(self, common_raw, msg='Invalid CommonV1 structure'):
     '''
-    Helper
+    Assert given dict is valid gazelib/common/v1
     '''
     try:
         CommonV1.validate(common_raw)
     except:
-        self.fail('Invalid raw structure')
+        self.fail(msg)
 
 
 class TestCommonV1(unittest.TestCase):
+
+    def test_empty_init(self):
+        c = CommonV1()
+        assert_valid(self, c.raw, 'CommonV1 default structure is invalid.')
+
+    def test_init_with_file(self):
+        fpath = get_sample_filepath('sample.common.json')
+        c = CommonV1(fpath)
+        assert_valid(self, c.raw)
 
     def test_validate(self):
         raw = load_sample('sample.common.json')
         subraw = load_sample('subsample.common.json')
 
         # Ensure fixtures are valid
-        try:
-            CommonV1.validate(raw)
-            CommonV1.validate(subraw)
-        except:
-            self.fail('CommonV1 fixtures seem invalid.')
+        assert_valid(self, raw)
+        assert_valid(self, subraw)
 
         # Make invalid modification
         raw['events'] = 'foo'
@@ -59,6 +70,30 @@ class TestCommonV1(unittest.TestCase):
         subraw['schema'] = 'foo'
         f = lambda: CommonV1.validate(subraw)
         self.assertRaises(jsonschema.ValidationError, f)
+
+    def test_global_and_relative_time_with_none(self):
+        c = CommonV1(get_sample_filepath('sample.common.json'))
+
+        gt = c.get_global_time()
+
+        t = c.convert_to_global_time(5.0);
+        self.assertEqual(t - 5.0, gt)
+        self.assertEqual(c.convert_to_relative_time(t), 5.0)
+
+        self.assertIsNone(c.convert_to_global_time(None))
+        self.assertIsNone(c.convert_to_relative_time(None))
+
+    def test_get_start_end_time(self):
+        subraw = load_sample('subsample.common.json')
+        subg = CommonV1(subraw)
+
+        t0 = subg.get_relative_start_time()
+        t1 = subg.get_relative_end_time()
+        dur = subg.get_duration()
+
+        self.assertEqual(t0, -0.5)
+        self.assertEqual(t1, 0.5)
+        self.assertEqual(dur, 1.0)
 
     def test_slice_by_relative_time(self):
 
@@ -78,7 +113,10 @@ class TestCommonV1(unittest.TestCase):
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
-        sliceg = g.slice_by_global_time(1234567890.05, 1234567890.11)
+        gt1 = g.convert_to_global_time(0.05)
+        gt2 = g.convert_to_global_time(0.11)
+
+        sliceg = g.slice_by_global_time(gt1, gt2)
 
         dd = DeepDiff(sliceg.raw, subg.raw)
         self.assertEqual(dd, {})
@@ -89,6 +127,14 @@ class TestCommonV1(unittest.TestCase):
         subraw = load_sample('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
+
+        # Test invalid timeline
+        f = lambda: g.slice_by_timeline('foo', 5)
+        self.assertRaises(CommonV1.MissingTimelineException, f)
+
+        # Test invalid end index
+        f = lambda: g.slice_by_timeline('ecg', 5, 4)
+        self.assertRaises(CommonV1.InvalidRangeException, f)
 
         sliceg = g.slice_by_timeline('ecg', 5)
 
@@ -105,9 +151,12 @@ class TestCommonV1(unittest.TestCase):
         subg = gazelib.containers.CommonV1(subraw)
 
         sliceg = g.slice_by_tag('test/last-half')
-
         dd = DeepDiff(subg.raw, sliceg.raw)
         self.assertEqual(dd, {})
+
+        # Reference by index
+        slicec = g.slice_by_tag('test/center', index=1)
+        self.assertEqual(len(slicec.get_timeline('eyetracker')), 1)
 
     def test_iter_slices_by_tag(self):
 
@@ -131,6 +180,11 @@ class TestCommonV1(unittest.TestCase):
 
         g.add_environment('test_env', 123)
         self.assertEqual(g.get_environment('test_env'), 123)
+        self.assertIn('test_env', g.get_environment_names())
+
+        self.assertTrue(g.has_environments(['test_env']))
+        f = lambda: g.assert_has_environments(['test_env', 'foo'])
+        self.assertRaises(CommonV1.InsufficientDataException, f)
 
         assert_valid(self, g.raw)
 
@@ -149,7 +203,11 @@ class TestCommonV1(unittest.TestCase):
         self.assertRaises(isex, f)
 
         g.add_stream('my_stream', 'eyetracker', [1, 2, 3, 4, 5])
-        self.assertIn('my_stream', g.iter_stream_names())
+        self.assertIn('my_stream', g.get_stream_names())
+
+        self.assertTrue(g.has_streams(['my_stream']))
+        f = lambda: g.assert_has_streams(['my_stream', 'foo'])
+        self.assertRaises(CommonV1.InsufficientDataException, f)
 
         assert_valid(self, g.raw)
 
@@ -171,3 +229,17 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(l), 1)
 
         assert_valid(self, g.raw)
+
+    def test_save_as_json(self):
+
+        fpath = get_temp_filepath('myfile.json')
+        c = CommonV1()
+        c.add_environment('test', 'hello')
+        c.save_as_json(fpath)
+
+        cc = CommonV1(fpath)
+        self.assertTrue(cc.has_environments(['test']))
+
+        self.assertTrue(os.path.exists(fpath))
+        remove_temp_file(fpath)
+        self.assertFalse(os.path.exists(fpath))

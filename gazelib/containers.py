@@ -2,14 +2,25 @@
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
-from .validation import has_keys, is_list_of_strings, is_real
+from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
+from .io import load_json, write_json
+from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
 from jsonschema import validate as validate_jsonschema
 
 
 class CommonV1(object):
+
+    class InvalidRangeException(Exception):
+        '''
+        Raised if invalid range index pair were given. E.g. start > end
+        '''
+        pass
+
+    class MissingEnvironmentException(Exception):
+        pass
 
     class MissingTimelineException(Exception):
         pass
@@ -23,7 +34,12 @@ class CommonV1(object):
     class InvalidEventException(Exception):
         pass
 
+    class InsufficientDataException(Exception):
+        pass
+
     # JSON Schema to validate raw input
+    # For grammar,
+    # see http://json-schema.org/latest/json-schema-validation.html
     SCHEMA = {
         '$schema': 'http://json-schema.org/draft-04/schema#',
         'title': 'gazelib/common/v1',
@@ -112,17 +128,74 @@ class CommonV1(object):
         '''
         validate_jsonschema(raw_common, CommonV1.SCHEMA)
 
+    def __init__(self, raw_common_or_filepath=None):
+        '''
+        Parameters:
+            raw_common_or_filepath:
+                Optional. A dict formatted in gazelib/common/v1
+                or a string path to a source file.
+                Supported source file types:
+                - JSON
 
-    def __init__(self, raw_common):
+        Raises:
+            ValidationError
+        '''
 
-        CommonV1.validate(raw_common)
-        self.raw = raw_common
+        r = raw_common_or_filepath  # alias
+
+        if r is None:
+            # Construct with empty.
+            r = {
+                'schema': 'gazelib/common/v1',
+                'global_posix_time': get_current_posix_time(),
+                'environment': {},
+                'timelines': {},
+                'streams': {},
+                'events': []
+            }
+        elif isinstance(r, str):
+            # Load file
+            r = load_json(r)
+            CommonV1.validate(r)
+        else:
+            CommonV1.validate(r)
+
+        self.raw = r
 
     def __eq__(self, other):
         '''
         Override '==' operator
         '''
         return DeepDiff(self.raw, other.raw) == {}
+
+    # Assertions
+
+    def assert_has_environments(self, env_names):
+        if not self.has_environments(env_names):
+            required = ', '.join(env_names)
+            available = ', '.join(self.get_environment_names())
+            msg = 'Environments ' + required + ' are needed but only ' + \
+                available + ' are available.'
+            raise CommonV1.InsufficientDataException(msg)
+
+    def assert_has_streams(self, stream_names):
+        if not self.has_streams(stream_names):
+            required = ', '.join(stream_names)
+            available = ', '.join(self.get_stream_names())
+            msg = 'Streams ' + required + ' are needed but only ' + \
+                available + ' are available.'
+            raise CommonV1.InsufficientDataException(msg)
+
+    def assert_range_order(self, start, end, start_name, end_name):
+        '''
+        Raise InvalidRangeException if start larger or equal than end.
+        '''
+        # Ensure correct order
+        if start is not None and end is not None:
+            if start >= end:
+                msg = (start_name + ' (' + str(start) + ') must be ' +
+                       'smaller than ' + end_name + ' (' + str(end) + ')')
+                raise CommonV1.InvalidRangeException(msg)
 
     # Accessors
 
@@ -139,30 +212,126 @@ class CommonV1(object):
         return global_time_seconds - gt
 
     def get_environment(self, env_name):
-        return self.raw['environment'][env_name]
+        '''
+        Return value of the environment.
+        '''
+        try:
+            return self.raw['environment'][env_name]
+        except KeyError:
+            str_e = str(env_name)
+            msg = 'Environment ' + str_e + ' not found.'
+            raise CommonV1.MissingEnvironmentException(msg)
+
+    def get_timeline(self, timeline_name):
+        '''
+        Return timeline i.e. a list of relative times.
+        '''
+        try:
+            return self.raw['timelines'][timeline_name]
+        except KeyError:
+            str_tl = str(timeline_name)
+            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
+                                                    ' not found.')
 
     def get_global_time(self):
+        '''
+        Return the global reference time as seconds from unix epoch.
+        '''
         return self.raw['global_posix_time']
 
-    def iter_environment_names(self):
-        return self.raw['environment'].keys()
+    def get_relative_start_time(self):
+        '''
+        Find he smallest time in the container as relative time.
+        Can be negative.
+        '''
+        # Min of first elements in timelines
+        tl_1st = [timeline[0] for timeline in self.raw['timelines'].values()]
+        tl_min = min(tl_1st)
 
-    def iter_stream_names(self):
-        return self.raw['streams'].keys()
+        # Min in range of events
+        ev_1st = [ev['range'][0] for ev in self.raw['events']]
+        ev_min = min(ev_1st)
+
+        return min(tl_min, ev_min)
+
+    def get_relative_end_time(self):
+        '''
+        Find the largest time in the container as relative time.
+        Can be negative.
+        '''
+        # Max of last elements in timelines
+        tl_last = [timeline[-1] for timeline in self.raw['timelines'].values()]
+        tl_max = max(tl_last)
+
+        # Max in range of events
+        ev_last = [ev['range'][1] for ev in self.raw['events']]
+        ev_max = max(ev_last)
+
+        return max(tl_max, ev_max)
+
+    def get_duration(self):
+        '''
+        Difference in seconds between the smallest and largest time point.
+        '''
+        return self.get_relative_end_time() - self.get_relative_start_time()
+
+    def get_environment_names(self):
+        '''
+        Return list of names of provided environments.
+        '''
+        return list(self.raw['environment'].keys())
+
+    def get_stream_names(self):
+        '''
+        Return list of names of provided streams.
+        '''
+        return list(self.raw['streams'].keys())
 
     def iter_events_by_tag(self, tag):
         '''
-        Yields events with the tag.
+        Yields those events which have the given tag.
         '''
         for event in self.raw['events']:
             if tag in event['tags']:
                 yield event
+
+    def has_environments(self, env_names):
+        '''
+        Test if environments are available.
+
+        Parameter:
+            env_names, list of strings
+
+        Return:
+            True, if all the given environments are available.
+            False, otherwise
+        '''
+        available_envs = self.get_environment_names()
+        return all(env in available_envs for env in env_names)
+
+    def has_streams(self, stream_names):
+        '''
+        Test if streams are available.
+
+        Parameter:
+            stream_names, list of strings
+
+        Return:
+            True, if all the given streams are available.
+            False, otherwise
+        '''
+        available_streams = self.get_stream_names()
+        return all(st in available_streams for st in stream_names)
 
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
         Does not update global_posix_time because easier implementation.
         '''
+
+        # Ensure correct order
+        self.assert_range_order(rel_start_time, rel_end_time,
+                                'rel_start_time', 'rel_end_time')
 
         # The new copy
         slice_raw = {
@@ -178,7 +347,7 @@ class CommonV1(object):
 
             # Find indices from the original timeline
             tl_name = stream['timeline']
-            tl = self.raw['timelines'][tl_name]
+            tl = self.get_timeline(tl_name)  # Raises if not found
             first_i = bisect_left(tl, rel_start_time)  # first in range
             if rel_end_time is None:
                 end_i = None
@@ -241,6 +410,11 @@ class CommonV1(object):
             Updates the global_posix_time to start_time
                 to minimize representation size.
         '''
+
+        # Ensure correct order
+        self.assert_range_order(start_time, end_time,
+                                'start_time', 'end_time')
+
         r_start = self.convert_to_relative_time(start_time)
         r_end = self.convert_to_relative_time(end_time)
 
@@ -258,14 +432,12 @@ class CommonV1(object):
                 If None given, slice to the end.
 
         '''
-        timelines = self.raw['timelines']
 
-        # Ensure timeline exists
-        if timeline_name not in timelines:
-            str_tl = str(timeline_name)
-            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
-                                                    ' not found.')
-        timeline = timelines[timeline_name]
+        # Ensure correct order
+        self.assert_range_order(start_index, end_index,
+                                'start_index', 'end_index')
+
+        timeline = self.get_timeline(timeline_name)
 
         # Limit indices
         last_index = len(timeline) - 1
@@ -394,3 +566,11 @@ class CommonV1(object):
         '''
         # TODO validate
         self.raw['global_posix_time'] = seconds_from_epoch
+
+    # IO
+
+    def save_as_json(self, target_file_path):
+        '''
+        Store the content in gazelib/common/v1 in a JSON file.
+        '''
+        write_json(target_file_path, self.raw)
