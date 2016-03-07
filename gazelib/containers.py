@@ -4,6 +4,7 @@ Classes that store the gaze data and can be fed to analysis functions.
 '''
 from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
+from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
 from jsonschema import validate as validate_jsonschema
@@ -117,12 +118,24 @@ class CommonV1(object):
         '''
         validate_jsonschema(raw_common, CommonV1.SCHEMA)
 
-    def __init__(self, raw_common):
+    def __init__(self, raw_common=None):
         '''
         Raises:
             ValidationError
         '''
-        CommonV1.validate(raw_common)
+        if raw_common is None:
+            # Construct with empty.
+            raw_common = {
+                'schema': 'gazelib/common/v1',
+                'global_posix_time': get_current_posix_time(),
+                'environment': {},
+                'timelines': {},
+                'streams': {},
+                'events': []
+            }
+        else:
+            CommonV1.validate(raw_common)
+
         self.raw = raw_common
 
     def __eq__(self, other):

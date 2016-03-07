@@ -39,6 +39,14 @@ def assert_valid(self, common_raw):
 
 class TestCommonV1(unittest.TestCase):
 
+    def test_empty_init(self):
+        c = CommonV1()
+
+        try:
+            CommonV1.validate(c.raw)
+        except:
+            self.fail('CommonV1 default empty structure is invalid.')
+
     def test_validate(self):
         raw = load_sample('sample.common.json')
         subraw = load_sample('subsample.common.json')
