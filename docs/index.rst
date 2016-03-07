@@ -3,19 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-gazelib API
-===========
+Gazelib Docs
+============
+
+Lots of eyetracker data to be managed? No common schema for the data? Tired of rewriting your analysis scripts for each project? Gazelib will help you!
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    gazelib
 
-Lots of eyetracker data to be managed? No common schema for the data? Tired of rewriting your analysis scripts for each project? Gazelib will help you!
+See also
+--------
 
-For the available tools, check out the API reference.
+- `gazelib at GitHub
+<https://github.com/infant-cognition-tampere/gazelib>`_
+- `gazelib at PyPI
+<https://pypi.python.org/pypi/gazelib>`_
+
 
 Indices and tables
 ==================
