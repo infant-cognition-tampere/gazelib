@@ -2,22 +2,23 @@
 gazelib
 ========
 
-The Python package *gazelib* provides software tools to manage and analyze gaze data from eye-trackers.
+This **Python** package provides software tools to manage and analyze **gaze data from eye-trackers**.
 
-*Gazelib* is developed at `Infant Cognition Laboratory
+Gazelib is developed at `Infant Cognition Laboratory
 <http://www.uta.fi/med/icl/index.html>`_ at University of Tampere.
-
 
 .. image:: https://travis-ci.org/infant-cognition-tampere/gazelib.svg
   :target: https://travis-ci.org/infant-cognition-tampere/gazelib
+  :alt: Travis CI build status
 .. image:: https://coveralls.io/repos/infant-cognition-tampere/gazelib/badge.svg?branch=master&service=github
   :target: https://coveralls.io/github/infant-cognition-tampere/gazelib?branch=master
+  :alt: Coveralls.io test coverage
 .. image:: https://readthedocs.org/projects/gazelib/badge/
   :target: http://gazelib.readthedocs.org/en/latest/
-  :alt: Documentation Status
+  :alt: ReadTheDocs documentation status
 .. image:: https://badge.fury.io/py/gazelib.svg
-  :target: https://badge.fury.io/py/gazelib
-  :alt: Version
+  :target: https://pypi.python.org/pypi/gazelib
+  :alt: PyPI package version
 
 
 Install
