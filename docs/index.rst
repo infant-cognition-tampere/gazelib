@@ -11,9 +11,8 @@ Lots of eyetracker data to be managed? No common schema for the data? Tired of r
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
-   gazelib
    modules
 
 See also
