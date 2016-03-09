@@ -23,3 +23,6 @@ class TestValidation(unittest.TestCase):
         self.assertFalse(unit.is_list_of_strings(('a','b')))
         self.assertTrue(unit.is_list_of_strings(['a','b']))
         self.assertTrue(unit.is_list_of_strings([]))
+
+if __name__ == '__main__':
+    unittest.main()

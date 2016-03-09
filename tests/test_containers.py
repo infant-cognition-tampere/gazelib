@@ -243,3 +243,7 @@ class TestCommonV1(unittest.TestCase):
         self.assertTrue(os.path.exists(fpath))
         remove_temp_file(fpath)
         self.assertFalse(os.path.exists(fpath))
+
+
+if __name__ == '__main__':
+    unittest.main()
