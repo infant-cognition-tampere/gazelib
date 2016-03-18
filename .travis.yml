@@ -10,6 +10,11 @@ python:
 install:
   - pip install tox-travis python-coveralls
 
+  ######
+  # If numpy is installing too slowly, see:
+  # - https://gist.github.com/dan-blanchard/7045057
+  # - http://conda.pydata.org/docs/travis.html
+
 # command to run tests
 script:
   - tox
