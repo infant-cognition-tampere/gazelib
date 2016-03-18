@@ -4,7 +4,7 @@ Classes that store the gaze data and can be fed to analysis functions.
 '''
 from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
-from .io import load_json, write_json
+from .io import load_json, write_json, write_fancy_json
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
@@ -569,8 +569,17 @@ class CommonV1(object):
 
     # IO
 
-    def save_as_json(self, target_file_path):
+    def save_as_json(self, target_file_path, human_readable=False):
         '''
         Store the content in gazelib/common/v1 in a JSON file.
+
+        Parameters:
+            target_file_path
+                Absolut or relative file path as string.
+            human_readable
+                Set True for new lines and indentation. Default to False.
         '''
-        write_json(target_file_path, self.raw)
+        if human_readable:
+            write_fancy_json(target_file_path, self.raw)
+        else:
+            write_json(target_file_path, self.raw)

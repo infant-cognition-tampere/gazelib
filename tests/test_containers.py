@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     import unittest2 as unittest  # to support Python 2.6
 except ImportError:
@@ -13,9 +14,10 @@ from gazelib.containers import CommonV1
 
 from .utils import get_temp_filepath, remove_temp_file
 import jsonschema
+import difflib
 import os
 
-def get_sample_filepath(sample_name):
+def get_fixture_filepath(sample_name):
     '''
     Create absolute filepath from sample filename.
     '''
@@ -28,7 +30,7 @@ def load_sample(sample_name):
     Reads from fixtures/ directory
     Access e.g. by: load_sample('sample.common.json')
     '''
-    full_path = get_sample_filepath(sample_name)
+    full_path = get_fixture_filepath(sample_name)
     return gazelib.io.load_json(full_path)
 
 
@@ -42,6 +44,34 @@ def assert_valid(self, common_raw, msg='Invalid CommonV1 structure'):
         self.fail(msg)
 
 
+def assert_files_equal(self, filepath1, filepath2,
+                       msg='Files should be equal but are not'):
+    '''
+    Assert the content of two files are equal. Do not care about empty spaces
+    at the end of the files.
+    '''
+    with open(filepath1, 'r') as f1, open(filepath2, 'r') as f2:
+        # Two lists of lines. Each element is a string that ends with '\n'
+        s1 = list(f1.readlines())
+        s2 = list(f2.readlines())
+        #print(''.join(s1))
+        #print(''.join(s1))
+    # Trim last white space because it causes problems because
+    # hand-written JSON includes trailing empty line where
+    # the generated JSON does not even when otherwise human readable.
+    s1[-1] = s1[-1].rstrip()
+    s2[-1] = s2[-1].rstrip()
+    # Short names for nice message.
+    b1 = os.path.basename(filepath1)
+    b2 = os.path.basename(filepath2)
+    diffs = list(difflib.unified_diff(s1, s2, b1, b2, n=0))
+    if len(diffs) != 0:
+        # Files not equal
+        diffmsg = ''.join(diffs)
+        msg = msg + ':\n' + diffmsg
+        self.fail(msg)
+
+
 class TestCommonV1(unittest.TestCase):
 
     def test_empty_init(self):
@@ -49,7 +79,7 @@ class TestCommonV1(unittest.TestCase):
         assert_valid(self, c.raw, 'CommonV1 default structure is invalid.')
 
     def test_init_with_file(self):
-        fpath = get_sample_filepath('sample.common.json')
+        fpath = get_fixture_filepath('sample.common.json')
         c = CommonV1(fpath)
         assert_valid(self, c.raw)
 
@@ -72,7 +102,7 @@ class TestCommonV1(unittest.TestCase):
         self.assertRaises(jsonschema.ValidationError, f)
 
     def test_global_and_relative_time_with_none(self):
-        c = CommonV1(get_sample_filepath('sample.common.json'))
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
 
         gt = c.get_global_time()
 
@@ -244,6 +274,16 @@ class TestCommonV1(unittest.TestCase):
         remove_temp_file(fpath)
         self.assertFalse(os.path.exists(fpath))
 
+    def test_save_as_json_human_readable(self):
+
+        fpath = get_temp_filepath('myfile.json')
+        c = CommonV1()
+        c.set_global_time(0)
+        c.save_as_json(fpath, human_readable=True)
+        assert_files_equal(self, fpath,
+                           get_fixture_filepath('minimal.common.json'))
+
+        remove_temp_file(fpath)
 
 if __name__ == '__main__':
     unittest.main()
