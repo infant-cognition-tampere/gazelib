@@ -28,16 +28,18 @@ def write_fancy_json(filename, data):
                   indent=4, ensure_ascii=False)
 
 
-def load_csv_as_dictlist(filename, delimit='\t'):
+def load_csv_as_dictlist(filename, delimit='\t', silent=True):
     # Load a file in csv (common in .gazedata) and return data in JSON suitable
     # for analysis.
 
-    print("Loading csv-file " + filename)
+    if not silent:
+        print("Loading csv-file " + filename)
 
     try:
         ifile = open(filename, "r")
     except Exception as ex:
-        print("File loading error: " + str(ex))
+        if not silent:
+            print("File loading error: " + str(ex))
         return
 
     reader = csv.reader(ifile, delimiter=delimit)
@@ -57,7 +59,10 @@ def load_csv_as_dictlist(filename, delimit='\t'):
 
     ifile.close()
 
-    print("File loaded succesfully. " + str(len(rows)) + " rows read.")
+
+    if not silent:
+        print("File loaded succesfully. " + str(len(rows)) + " rows read.")
+
     return rows
 
 
