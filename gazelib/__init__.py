@@ -2,4 +2,4 @@
 '''
 Gazelib, a toolkit for gaze analysis.
 '''
-from gazelib.package import version as __version__
+from gazelib.package import version as __version__  # noqa

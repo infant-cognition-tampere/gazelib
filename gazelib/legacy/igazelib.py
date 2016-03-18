@@ -34,12 +34,14 @@ def median(lst):
     else:
         return (sortedLst[index] + sortedLst[index + 1]) / 2.0
 
+
 def mean(lst):
     '''
     Return mean of the list of numbers.
     '''
     # http://stackoverflow.com/a/7716358/638546
     return float(sum(lst)) / len(lst) if len(lst) > 0 else float('nan')
+
 
 def first_gazepoints_by_time(data, time_key, timeunits, silent=True):
     '''
@@ -57,8 +59,8 @@ def first_gazepoints_by_time(data, time_key, timeunits, silent=True):
     new_data = [gp.copy() for gp in data if timeunits > int(gp[tk]) - start]
 
     if not silent:
-      print(indent + "List contains " + str(len(new_data)) +
-            " gazepoints after operation.")
+        print(indent + "List contains " + str(len(new_data)) +
+              " gazepoints after operation.")
 
     return new_data
 
@@ -99,7 +101,7 @@ def gazepoints_after_time(data, time_key, timeunits, silent=True):
     start = int(get_value(data, 0, tk))
 
     # generate a new list of datapoints
-    new_data = [ gp.copy() for gp in data if timeunits <= int(gp[tk]) - start ]
+    new_data = [gp.copy() for gp in data if timeunits <= int(gp[tk]) - start]
 
     if not silent:
         print(indent + "List contains " + str(len(new_data)) +
@@ -123,7 +125,7 @@ def gazepoints_containing_value(data, key, value_list, silent=True):
     assert isinstance(value_list, list)
 
     # find gazepoints which contain the value
-    gazepoints_found = [ gp.copy() for gp in data if gp[key] in value_list ]
+    gazepoints_found = [gp.copy() for gp in data if gp[key] in value_list]
 
     if not silent:
         print(indent + "Datamatrix contains " + str(len(gazepoints_found)) +
@@ -146,7 +148,7 @@ def gazepoints_not_containing_value(data, key, value_list, silent=True):
     assert isinstance(value_list, list)
 
     # find rows which do not contain the value
-    rows_found = [ row for row in data if row[key] not in value_list  ]
+    rows_found = [row for row in data if row[key] not in value_list]
 
     if not silent:
         print(indent + "List contains " + str(len(rows_found)) +
@@ -232,12 +234,11 @@ def border_violation(data, aoi, xkey, ykey, valkey,
         print("Calculating if a gaze moved over aoi border " +
               "during invalid data...")
 
-    gaze_inside_last_good = True
+    gaze_in_last_good = True
     gaze_okay_before = True
 
     for index, row in enumerate(data):
-
-    #    if accepted_validities.__contains__(row[valcol]):
+        # if accepted_validities.__contains__(row[valcol]):
         if row[valkey] in accepted_validities:
             # gaze okay
             gaze_okay = True
@@ -245,16 +246,16 @@ def border_violation(data, aoi, xkey, ykey, valkey,
             # gaze not okay
             gaze_okay = False
 
-        gaze_inside = inside_aoi(aoi, row[xkey], row[ykey])
+        gaze_in = inside_aoi(aoi, row[xkey], row[ykey])
 
         if index > 0:
             if gaze_okay:
-                if not gaze_okay_before and gaze_inside != gaze_inside_last_good:
+                if not gaze_okay_before and gaze_in != gaze_in_last_good:
                     if not silent:
                         print(indent + "Border violation detected.")
                     return True
 
-                gaze_inside_last_good = gaze_inside
+                gaze_in_last_good = gaze_in
 
         gaze_okay_before = gaze_okay
 
@@ -272,7 +273,7 @@ def inside_aoi(aoi, x, y):
     bottom-right corner at (x2, y2).
     '''
 
-    if (aoi["x1"] < x  and x < aoi["x2"]) and (aoi["y1"] < y and y < aoi["y2"]):
+    if aoi["x1"] < x and x < aoi["x2"] and aoi["y1"] < y and y < aoi["y2"]:
         return True
     else:
         return False
@@ -363,7 +364,7 @@ def median_filter(datapoints, winlen, silent=True):
               str(winlen) + " for " + str(len(datapoints)) + " datapoints...")
 
     # calculate padding length
-    padlen = (winlen - 1) // 2;
+    padlen = (winlen - 1) // 2
 
     # form padding (first and last number repeated at the beginning and end)
     pad_start = padlen * [datapoints[0]]
@@ -372,7 +373,7 @@ def median_filter(datapoints, winlen, silent=True):
     datapoints_pad = pad_start + datapoints + pad_end
 
     # for each datapoint
-    filtered_datapoints = [];
+    filtered_datapoints = []
     for i in range(0, len(datapoints)):
         wind = datapoints_pad[i:i+2*padlen+1]
         filtered_datapoints.append(median(wind))
@@ -388,8 +389,8 @@ def interpolate_using_last_good_value(data, key, valkey, accepted_validities,
     '''
     Interpolates values with key "key" in DATA-matrix by replacing the bad
     value with last good value before bad values (if there is at least one good
-    value, otherwise, do nothing). Validitycolumn contains the validity markings
-    for each datapoint and good validities are defined by the accepted
+    value, otherwise, do nothing). Validitycolumn contains the validity
+    markings for each datapoint and good validities are defined by the accepted
     validities-parameter. If the beginning of a trail is "bad", use the first
     appearing good value to interpolate that.
     '''
@@ -478,7 +479,7 @@ def gaze_inside_aoi_percentage(data, xcol, ycol, aoi, silent=True):
     if not silent:
         print(indent + "Done.")
 
-    return gaze_inside/float(rowcount)
+    return gaze_inside / float(rowcount)
 
 
 def longest_non_valid_streak(data, valkey, timekey, accepted_validities,
@@ -488,6 +489,7 @@ def longest_non_valid_streak(data, valkey, timekey, accepted_validities,
     if not silent:
         print("Calculating longest non-valid streak...")
 
+    streak_started = None
     longest_streak = 0
     streak_on = False
 
@@ -495,6 +497,7 @@ def longest_non_valid_streak(data, valkey, timekey, accepted_validities,
 
         # check if ongoing streak and put to longest if is
         if streak_on:
+            # Assert streak_started is set if streak_on
             streaklen = float(gp[timekey]) - float(streak_started)
             if streaklen > longest_streak:
                 longest_streak = streaklen

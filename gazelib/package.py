@@ -2,7 +2,7 @@
 
 name = 'gazelib'
 version = '1.1.0'
-description = 'Software tools to manage and analyze gaze data from eye-trackers'
+description = 'Software tools to manage and analyze data from eye-trackers'
 url = 'https://github.com/infant-cognition-tampere/gazelib'
 author = 'Akseli Palen'
 author_email = 'akseli.palen@gmail.com'
@@ -77,5 +77,5 @@ data_files = []
 entry_points = {}
 
 # To use nose2 to run your package’s tests, add the following
-tests_require = ['nose2', 'unittest2']
+tests_require = ['nose2', 'unittest2', 'flake8']
 test_suite = 'nose2.collector.collector'
