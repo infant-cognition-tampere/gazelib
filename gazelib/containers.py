@@ -20,21 +20,27 @@ class CommonV1(object):
         pass
 
     class MissingEnvironmentException(Exception):
+        '''Raised if a environment cannot be found.'''
         pass
 
     class MissingTimelineException(Exception):
+        '''Raised if a timeline cannot be found.'''
         pass
 
     class InvalidTimelineException(Exception):
+        '''Raised if a timeline does not fit the CommonV1 specification.'''
         pass
 
     class InvalidStreamException(Exception):
+        '''Raised if a stream does not fit the CommonV1 specification.'''
         pass
 
     class InvalidEventException(Exception):
+        '''Raised if an event does not fit the CommonV1 specification.'''
         pass
 
     class InsufficientDataException(Exception):
+        '''Raised if a timeline does not fit the CommonV1 specification.'''
         pass
 
     # JSON Schema to validate raw input
@@ -163,14 +169,17 @@ class CommonV1(object):
         self.raw = r
 
     def __eq__(self, other):
-        '''
-        Override '==' operator
-        '''
+        '''Override '==' operator with deep difference check.'''
         return DeepDiff(self.raw, other.raw) == {}
 
     # Assertions
 
     def assert_has_environments(self, env_names):
+        '''
+        Raises CommonV1.InsufficientDataException if the any of the
+        given environments is missing from the container. This is used
+        in analysis scripts that require certain environments.
+        '''
         if not self.has_environments(env_names):
             required = ', '.join(env_names)
             available = ', '.join(self.get_environment_names())
@@ -179,6 +188,11 @@ class CommonV1(object):
             raise CommonV1.InsufficientDataException(msg)
 
     def assert_has_streams(self, stream_names):
+        '''
+        Raises CommonV1.InsufficientDataException if the any of the
+        given streams is missing from the container. This is used
+        in analysis scripts that require certain streams.
+        '''
         if not self.has_streams(stream_names):
             required = ', '.join(stream_names)
             available = ', '.join(self.get_stream_names())
@@ -200,12 +214,14 @@ class CommonV1(object):
     # Accessors
 
     def convert_to_global_time(self, relative_time_seconds):
+        '''Return global time in seconds (float)'''
         if relative_time_seconds is None:
             return None
         gt = self.raw['global_posix_time']
         return gt + relative_time_seconds
 
     def convert_to_relative_time(self, global_time_seconds):
+        '''Return relative time in seconds (float)'''
         if global_time_seconds is None:
             return None
         gt = self.raw['global_posix_time']
@@ -513,6 +529,16 @@ class CommonV1(object):
     # Mutators
 
     def add_environment(self, env_name, env_value):
+        '''
+        Add new environment.
+
+        Parameters:
+            env_name
+                A string, the name of the environment. Use of semantic names
+                is recommended.
+            env_value
+                Any type of JSON-compatible object.
+        '''
         # TODO raise error if invalid
         self.raw['environment'][env_name] = env_value
 
@@ -593,6 +619,19 @@ class CommonV1(object):
             raise CommonV1.InvalidTimelineException()
 
     def add_event(self, tags, start_time, end_time, extra=None):
+        '''
+        Add new event.
+
+        Parameters:
+            tags
+                A list of tag strings.
+            start_time
+                A relative time in seconds. The starting time of the event.
+            end_time
+                A relative time in seconds. The ending time of the event.
+            extra
+                An optional place for extra info. Typically a dict.
+        '''
         if not is_list_of_strings(tags):
             raise CommonV1.InvalidEventException('Invalid tag list')
         if (not is_real(start_time)) or (not is_real(end_time)):
