@@ -517,19 +517,56 @@ class CommonV1(object):
         self.raw['environment'][env_name] = env_value
 
     def add_stream(self, stream_name, timeline_name, values, confidence=None):
+        '''
+        Add a new sequence of sampled data.
+
+        Parameters:
+            stream_name
+                A string. It is advisable to use semantic names.
+            timeline_name
+                The name of the timeline that contains the sampling times of
+                the values.
+            values
+                An iterable of values. The length cannot be larger than
+                the length of the timeline.
+            confidence
+                An optional iterable of confidence values. The confidencies
+                must be inclusively within 0.0 and 1.0.
+        '''
         if timeline_name not in self.raw['timelines']:
-            raise CommonV1.MissingTimelineException(
-                'Timeline ' + timeline_name + ' not found.')
+            msg = 'Timeline ' + timeline_name + ' not found.'
+            raise CommonV1.MissingTimelineException(msg)
+
         if type(stream_name) is not str:
             raise CommonV1.InvalidStreamException()
-        if type(values) is not list:
-            raise CommonV1.InvalidStreamException('Values must be a list.')
+
+        if not hasattr(values, '__iter__'):
+            msg = 'Values must be an iterable.'
+            raise CommonV1.InvalidStreamException(msg)
+        # Convert to list so length can be checked.
+        # The specification also requires the internal representation
+        # to be a list.
+        values = list(values)
+
         if len(values) != len(self.raw['timelines'][timeline_name]):
-            raise CommonV1.InvalidStreamException(
-                'Stream and timeline must have equal length.')
-        if confidence is not None and type(confidence) is not list:
-            raise CommonV1.InvalidStreamException(
-                'Confidence must be a list or None')
+            msg = 'Stream and timeline must have equal length.'
+            raise CommonV1.InvalidStreamException(msg)
+
+        if confidence is not None:
+            if not hasattr(confidence, '__iter__'):
+                msg = 'Confidence must be an iterable or None'
+                raise CommonV1.InvalidStreamException(msg)
+            # Convert to list so length can be checked.
+            # The specification also requires the internal representation
+            # to be a list.
+            confidence = list(confidence)
+            if len(confidence) != len(values):
+                msg = 'Confidence length must equal to values'
+                raise CommonV1.InvalidStreamException(msg)
+            # Ensure values inclusively between 0.0 and 1.0
+            if any(map(lambda c: c < 0.0 or c > 1.0, confidence)):
+                msg = 'Confidence values must be within [0.0, 1.0]'
+                raise CommonV1.InvalidStreamException(msg)
 
         new_stream = {
             'timeline': timeline_name,
@@ -541,8 +578,17 @@ class CommonV1(object):
         self.raw['streams'][stream_name] = new_stream
 
     def add_timeline(self, timeline_name, timeline_values):
-        if type(timeline_name) is str and type(timeline_values) is list:
-            self.raw['timelines'][timeline_name] = timeline_values
+        '''
+        Add a new timeline.
+
+        Parameters:
+            timeline_name
+                A string that will be referenced from the streams.
+            timeline_values
+                An iterable, will be converted to list.
+        '''
+        if type(timeline_name) is str and hasattr(timeline_values, '__iter__'):
+            self.raw['timelines'][timeline_name] = list(timeline_values)
         else:
             raise CommonV1.InvalidTimelineException()
 
