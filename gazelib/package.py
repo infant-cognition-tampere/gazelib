@@ -76,6 +76,8 @@ data_files = []
 # pip to create the appropriate form of executable for the target platform.
 entry_points = {}
 
+# DEPRECATED: Use 'tox' with 'pyenv' instead.
+#   Put test dependencies to 'tox.ini'
 # To use nose2 to run your package’s tests, add the following
-tests_require = ['nose2', 'unittest2', 'flake8']
-test_suite = 'nose2.collector.collector'
+# tests_require = ['nose2', 'unittest2', 'flake8']
+# test_suite = 'nose2.collector.collector'
