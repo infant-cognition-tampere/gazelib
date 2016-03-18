@@ -30,8 +30,16 @@ def write_fancy_json(filename, data):
     Write JSON so that it is readable by humans (new lines, indent..).
     '''
     with open(filename, 'w') as outfile:
-        json.dump(data, outfile, sort_keys=True,
-                  indent=4, ensure_ascii=False)
+        # ensure_ascii=False
+        #   'True' would turn non-ascii characters such
+        #   as ä and ö to escaped unicode sequences: \uXXXX, turning text
+        #   hard to read.
+        # separators
+        #   Without setting separators explicitly,
+        #   Python 2.7 and Python 3.5 would produce different output.
+        #   See https://docs.python.org/3/library/json.html#json.dump
+        json.dump(data, outfile, sort_keys=True, indent=4, ensure_ascii=False,
+                  separators=(',', ': '))
 
 
 def load_csv_as_dictlist(filename, delimit='\t', silent=True):

@@ -54,20 +54,18 @@ def assert_files_equal(self, filepath1, filepath2,
         # Two lists of lines. Each element is a string that ends with '\n'
         s1 = list(f1.readlines())
         s2 = list(f2.readlines())
-        #print(''.join(s1))
-        #print(''.join(s1))
-    # Trim last white space because it causes problems because
+    # Trim new lines because it causes problems because
     # hand-written JSON includes trailing empty line where
-    # the generated JSON does not even when otherwise human readable.
-    s1[-1] = s1[-1].rstrip()
-    s2[-1] = s2[-1].rstrip()
-    # Short names for nice message.
-    b1 = os.path.basename(filepath1)
-    b2 = os.path.basename(filepath2)
-    diffs = list(difflib.unified_diff(s1, s2, b1, b2, n=0))
+    # the generated JSON does not.
+    s1 = list(map(lambda l: l.rstrip('\n'), s1))
+    s2 = list(map(lambda l: l.rstrip('\n'), s2))
+    # File names for nice message.
+    b1 = filepath1
+    b2 = filepath2
+    diffs = list(difflib.unified_diff(s1, s2, b1, b2, lineterm='', n=0))
     if len(diffs) != 0:
         # Files not equal
-        diffmsg = ''.join(diffs)
+        diffmsg = '\n'.join(diffs)
         msg = msg + ':\n' + diffmsg
         self.fail(msg)
 
