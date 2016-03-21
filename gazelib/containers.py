@@ -682,7 +682,7 @@ class CommonV1(object):
     # IO
 
     def save_timeline_as_csv(self, timeline_name, target_file_path,
-                             delimit='\t'):
+                             delimiter='\t'):
         '''
         Store timeline and its associated streams in a comma separated values
         format. Note that neither events nor environments are included.
@@ -714,7 +714,7 @@ class CommonV1(object):
                 yield d
 
         write_dictlist_as_csv(target_file_path, iterstreams(),
-                              headers=headers, delimit=delimit)
+                              headers=headers, delimiter=delimiter)
 
     def save_as_json(self, target_file_path, human_readable=False):
         '''

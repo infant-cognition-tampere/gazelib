@@ -42,7 +42,7 @@ def write_fancy_json(filename, data):
                   separators=(',', ': '))
 
 
-def load_csv_as_dictlist(filename, delimit='\t', silent=True):
+def load_csv_as_dictlist(filename, delimiter='\t', silent=True):
     '''
     Load a file in csv (common in .gazedata) and return data as
     list of dicts. Each dict contains the column names as keys and
@@ -59,7 +59,7 @@ def load_csv_as_dictlist(filename, delimit='\t', silent=True):
             print("File loading error: " + str(ex))
         return
 
-    reader = csv.reader(ifile, delimiter=delimit)
+    reader = csv.reader(ifile, delimiter=delimiter)
 
     rownum = 0
     rows = []
@@ -83,7 +83,7 @@ def load_csv_as_dictlist(filename, delimit='\t', silent=True):
 
 
 def write_dictlist_as_csv(target_filename, dictlist, headers=None,
-                          delimit='\t'):
+                          delimiter='\t'):
     '''
     Write given list of dicts to a file as CSV. Each dict is required
     to have key for each column name. The column names are read from the
@@ -96,7 +96,7 @@ def write_dictlist_as_csv(target_filename, dictlist, headers=None,
             A list of dicts. Each dict is required to have same set of keys.
         headers:
             Optional list of keys. Defines the order of columns.
-        delimit:
+        delimiter:
             Delimiter character.
     '''
     # Normalize to iterable
@@ -112,7 +112,7 @@ def write_dictlist_as_csv(target_filename, dictlist, headers=None,
         writer = csv.DictWriter(csvfile,
                                 fieldnames=fieldnames,
                                 lineterminator='\n',
-                                delimiter=delimit)
+                                delimiter=delimiter)
         writer.writeheader()
         writer.writerow(first)
         for d in dictlist:
