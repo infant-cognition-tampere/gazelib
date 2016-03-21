@@ -43,6 +43,10 @@ class CommonV1(object):
         '''Raised if a timeline does not fit the CommonV1 specification.'''
         pass
 
+    class InvalidGlobalTimeException(Exception):
+        '''Raised if the global time is not an integer.'''
+        pass
+
     # JSON Schema to validate raw input
     # For grammar,
     # see http://json-schema.org/latest/json-schema-validation.html
@@ -56,7 +60,7 @@ class CommonV1(object):
                 'pattern': 'gazelib/common/v1'
             },
             'global_posix_time': {
-                'type': 'number'
+                'type': 'integer'
             },
             'environment': {
                 'type': 'object',
@@ -151,9 +155,10 @@ class CommonV1(object):
 
         if r is None:
             # Construct with empty.
+            now = int(get_current_posix_time())
             r = {
                 'schema': 'gazelib/common/v1',
-                'global_posix_time': get_current_posix_time(),
+                'global_posix_time': now,
                 'environment': {},
                 'timelines': {},
                 'streams': {},
@@ -648,9 +653,18 @@ class CommonV1(object):
     def set_global_time(self, seconds_from_epoch):
         '''
         Can be used to anonymize data.
+
+        Parameter:
+            seconds_from_epoch, integer.
+
+        Raise:
+            InvalidGlobalTimeException if not integer.
         '''
-        # TODO validate
-        self.raw['global_posix_time'] = seconds_from_epoch
+        if isinstance(seconds_from_epoch, int):
+            # Note: what if
+            self.raw['global_posix_time'] = seconds_from_epoch
+        else:
+            raise CommonV1.InvalidGlobalTimeException('Must be integer.')
 
     # IO
 

@@ -201,6 +201,11 @@ class TestCommonV1(unittest.TestCase):
         #dd = DeepDiff(subg.raw, sliceg.raw)
         #self.assertEqual(dd, {})
 
+    def test_set_global_posix_time(self):
+        c = CommonV1()
+        f = lambda: c.set_global_time(1234567890.123456)
+        self.assertRaises(CommonV1.InvalidGlobalTimeException, f)
+
     def test_add_environment(self):
 
         raw = load_sample('sample.common.json')
