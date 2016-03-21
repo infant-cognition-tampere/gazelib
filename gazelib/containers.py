@@ -4,6 +4,7 @@ Classes that store the gaze data and can be fed to analysis functions.
 '''
 from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
+from .statistics.utils import arithmetic_mean, deltas
 from .io import load_json, write_json, write_fancy_json
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
@@ -249,6 +250,18 @@ class CommonV1(object):
         '''
         try:
             return self.raw['timelines'][timeline_name]
+        except KeyError:
+            str_tl = str(timeline_name)
+            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
+                                                    ' not found.')
+
+    def get_timeline_mean_interval(self, timeline_name):
+        '''
+        Return unbiased mean interval in seconds, measured over the timeline.
+        '''
+        try:
+            tl = self.raw['timelines'][timeline_name]
+            return arithmetic_mean(deltas(tl))
         except KeyError:
             str_tl = str(timeline_name)
             raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
