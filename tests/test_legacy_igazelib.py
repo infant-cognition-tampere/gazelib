@@ -81,9 +81,9 @@ class TestGazelibMethods(unittest.TestCase):
         filtered = gazelib.median_filter(gazelib.get_key(data, 'x'), 3)
         correct_filtered = [0.1, 0.4, 0.4, 0.4, 0.1, 0.1]
         self.assertListEqual(filtered, correct_filtered)
-        print(gazelib.get_key(data, 'x'))
+        #print(gazelib.get_key(data, 'x'))
         gazelib.add_key(data, 'x', correct_filtered)
-        print(gazelib.get_key(data, 'x'))
+        #print(gazelib.get_key(data, 'x'))
         self.assertListEqual(gazelib.median_filter_data(data, 3, 'x'),
                              gazelib.add_key(data, 'x', correct_filtered))
 
@@ -151,7 +151,7 @@ class TestGazelibMethods(unittest.TestCase):
         self.assertDictEqual(grouping, {'test':extra2, 'target': data + extra1})
 
         rtimes = [105, 120, 130, 1003]
-        print(gazelib.SRT_index(rtimes, 1000, 100))
+        #print(gazelib.SRT_index(rtimes, 1000, 100))
         #self.assertEqual(SRT_index(rtimes, 1000, 100), 100)
 
     def test_replace(self):

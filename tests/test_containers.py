@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     import unittest2 as unittest  # to support Python 2.6
 except ImportError:
@@ -11,11 +12,12 @@ pp = PrettyPrinter(indent=4)
 import gazelib
 from gazelib.containers import CommonV1
 
-from .utils import get_temp_filepath, remove_temp_file
+from .utils import get_temp_filepath, remove_temp_file, frange
 import jsonschema
+import difflib
 import os
 
-def get_sample_filepath(sample_name):
+def get_fixture_filepath(sample_name):
     '''
     Create absolute filepath from sample filename.
     '''
@@ -28,7 +30,7 @@ def load_sample(sample_name):
     Reads from fixtures/ directory
     Access e.g. by: load_sample('sample.common.json')
     '''
-    full_path = get_sample_filepath(sample_name)
+    full_path = get_fixture_filepath(sample_name)
     return gazelib.io.load_json(full_path)
 
 
@@ -42,6 +44,32 @@ def assert_valid(self, common_raw, msg='Invalid CommonV1 structure'):
         self.fail(msg)
 
 
+def assert_files_equal(self, filepath1, filepath2,
+                       msg='Files should be equal but are not'):
+    '''
+    Assert the content of two files are equal. Do not care about empty spaces
+    at the end of the files.
+    '''
+    with open(filepath1, 'r') as f1, open(filepath2, 'r') as f2:
+        # Two lists of lines. Each element is a string that ends with '\n'
+        s1 = list(f1.readlines())
+        s2 = list(f2.readlines())
+    # Trim new lines because it causes problems because
+    # hand-written JSON includes trailing empty line where
+    # the generated JSON does not.
+    s1 = list(map(lambda l: l.rstrip('\n'), s1))
+    s2 = list(map(lambda l: l.rstrip('\n'), s2))
+    # File names for nice message.
+    b1 = filepath1
+    b2 = filepath2
+    diffs = list(difflib.unified_diff(s1, s2, b1, b2, lineterm='', n=0))
+    if len(diffs) != 0:
+        # Files not equal
+        diffmsg = '\n'.join(diffs)
+        msg = msg + ':\n' + diffmsg
+        self.fail(msg)
+
+
 class TestCommonV1(unittest.TestCase):
 
     def test_empty_init(self):
@@ -49,7 +77,7 @@ class TestCommonV1(unittest.TestCase):
         assert_valid(self, c.raw, 'CommonV1 default structure is invalid.')
 
     def test_init_with_file(self):
-        fpath = get_sample_filepath('sample.common.json')
+        fpath = get_fixture_filepath('sample.common.json')
         c = CommonV1(fpath)
         assert_valid(self, c.raw)
 
@@ -72,7 +100,7 @@ class TestCommonV1(unittest.TestCase):
         self.assertRaises(jsonschema.ValidationError, f)
 
     def test_global_and_relative_time_with_none(self):
-        c = CommonV1(get_sample_filepath('sample.common.json'))
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
 
         gt = c.get_global_time()
 
@@ -173,6 +201,11 @@ class TestCommonV1(unittest.TestCase):
         #dd = DeepDiff(subg.raw, sliceg.raw)
         #self.assertEqual(dd, {})
 
+    def test_set_global_posix_time(self):
+        c = CommonV1()
+        f = lambda: c.set_global_time(1234567890.123456)
+        self.assertRaises(CommonV1.InvalidGlobalTimeException, f)
+
     def test_add_environment(self):
 
         raw = load_sample('sample.common.json')
@@ -193,8 +226,8 @@ class TestCommonV1(unittest.TestCase):
         raw = load_sample('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 
-        tlex = gazelib.containers.CommonV1.MissingTimelineException
-        isex = gazelib.containers.CommonV1.InvalidStreamException
+        tlex = CommonV1.MissingTimelineException
+        isex = CommonV1.InvalidStreamException
 
         f = lambda: g.add_stream('my_stream', 'my_timeline', [1,2,3])
         self.assertRaises(tlex, f)
@@ -211,12 +244,48 @@ class TestCommonV1(unittest.TestCase):
 
         assert_valid(self, g.raw)
 
+    def test_add_stream_with_invalid_confidence(self):
+        '''Confidency too short or elements not between 0.0 and 1.0'''
+        ex = CommonV1.InvalidStreamException
+        c = CommonV1()
+        c.add_timeline('mytime', [1, 2, 3])
+
+        # Too short
+        f = lambda: c.add_stream('foo', 'mytime', [5, 5, 5], [0.1])
+        self.assertRaises(ex, f)
+
+        # Too large and small values
+        f = lambda: c.add_stream('foo', 'mytime', [5, 5, 5], [0.1, -0.1, 10.0])
+        self.assertRaises(ex, f)
+
+    def test_add_stream_from_generator(self):
+        '''
+        Ensure add_timeline can handle generators and converts them to lists.
+        '''
+        c = CommonV1()
+        c.add_timeline('myline', frange(0.0, 100.0, 0.1))
+        c.add_stream('mystream', 'myline', frange(0.0, 200.0, 0.2),
+                     frange(0.0, 1.0, 0.001))
+        stream = c.raw['streams']['mystream']
+        self.assertEqual(len(stream['values']), 1000)
+        self.assertEqual(len(stream['confidence']), 1000)
+
+    def test_add_timeline_from_generator(self):
+        '''
+        Ensure add_timeline can handle generators and converts them to lists.
+        '''
+        c = CommonV1()
+        c.add_timeline('myline', frange(0.0, 100.0, 0.1))
+        tl = c.get_timeline('myline')
+        self.assertEqual(len(tl), 1000)
+        self.assertTrue(isinstance(tl, list))
+
     def test_add_event(self):
 
         raw = load_sample('sample.common.json')
-        g = gazelib.containers.CommonV1(raw)
+        g = CommonV1(raw)
 
-        ieex = gazelib.containers.CommonV1.InvalidEventException
+        ieex = CommonV1.InvalidEventException
 
         f = lambda: g.add_event('my_tag', 0.0, 1.4)
         self.assertRaises(ieex, f)
@@ -229,6 +298,19 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(l), 1)
 
         assert_valid(self, g.raw)
+
+    def test_save_timeline_as_csv(self):
+        # Load JSON file
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
+        # Save it partially as CSV
+        fpath = get_temp_filepath('myfile.csv')
+        c.save_timeline_as_csv('eyetracker', fpath, delimiter=',')
+
+        # Test equivalency
+        assert_files_equal(self, fpath,
+                           get_fixture_filepath('sample_eyetracker.csv'))
+        # Remove saved file
+        remove_temp_file(fpath)
 
     def test_save_as_json(self):
 
@@ -243,3 +325,17 @@ class TestCommonV1(unittest.TestCase):
         self.assertTrue(os.path.exists(fpath))
         remove_temp_file(fpath)
         self.assertFalse(os.path.exists(fpath))
+
+    def test_save_as_json_human_readable(self):
+
+        fpath = get_temp_filepath('myfile.json')
+        c = CommonV1()
+        c.set_global_time(0)
+        c.save_as_json(fpath, human_readable=True)
+        assert_files_equal(self, fpath,
+                           get_fixture_filepath('minimal.common.json'))
+
+        remove_temp_file(fpath)
+
+if __name__ == '__main__':
+    unittest.main()
