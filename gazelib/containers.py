@@ -5,7 +5,7 @@ Classes that store the gaze data and can be fed to analysis functions.
 from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
 from .statistics.utils import arithmetic_mean, deltas
-from .io import load_json, write_json, write_fancy_json
+from .io import load_json, write_json, write_fancy_json, write_dictlist_as_csv
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
@@ -680,6 +680,41 @@ class CommonV1(object):
             raise CommonV1.InvalidGlobalTimeException('Must be integer.')
 
     # IO
+
+    def save_timeline_as_csv(self, timeline_name, target_file_path,
+                             delimit='\t'):
+        '''
+        Store timeline and its associated streams in a comma separated values
+        format. Note that neither events nor environments are included.
+        '''
+        # Find timeline
+        tl = self.get_timeline(timeline_name)
+
+        # Build the headers in practical order.
+        headers = ['gazelib/time/seconds']
+
+        # Find streams on the timeline
+        streams = {}
+        for stream_name, stream in self.raw['streams'].items():
+            if stream['timeline'] == timeline_name:
+                streams[stream_name] = stream['values']
+                headers.append(stream_name)
+                if 'confidence' in stream:
+                    conf_name = stream_name + '/confidence'
+                    streams[conf_name] = stream['confidence']
+                    headers.append(conf_name)
+
+        # Define how to iterate over streams to get rows
+        def iterstreams():
+            for index in range(len(tl)):
+                d = {}
+                d['gazelib/time/seconds'] = tl[index]
+                for stream_name, stream in streams.items():
+                    d[stream_name] = stream[index]
+                yield d
+
+        write_dictlist_as_csv(target_file_path, iterstreams(),
+                              headers=headers, delimit=delimit)
 
     def save_as_json(self, target_file_path, human_readable=False):
         '''

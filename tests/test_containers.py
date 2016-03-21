@@ -299,6 +299,19 @@ class TestCommonV1(unittest.TestCase):
 
         assert_valid(self, g.raw)
 
+    def test_save_timeline_as_csv(self):
+        # Load JSON file
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
+        # Save it partially as CSV
+        fpath = get_temp_filepath('myfile.csv')
+        c.save_timeline_as_csv('eyetracker', fpath, delimit=',')
+
+        # Test equivalency
+        assert_files_equal(self, fpath,
+                           get_fixture_filepath('sample_eyetracker.csv'))
+        # Remove saved file
+        remove_temp_file(fpath)
+
     def test_save_as_json(self):
 
         fpath = get_temp_filepath('myfile.json')

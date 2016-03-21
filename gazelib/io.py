@@ -82,18 +82,38 @@ def load_csv_as_dictlist(filename, delimit='\t', silent=True):
     return rows
 
 
-def write_dictlist_as_csv(target_filename, dictlist, delimit='\t'):
+def write_dictlist_as_csv(target_filename, dictlist, headers=None,
+                          delimit='\t'):
     '''
     Write given list of dicts to a file as CSV. Each dict is required
     to have key for each column name. The column names are read from the
     first dict.
+
+    Parameters:
+        target_filename:
+            A path to target file
+        dictlist:
+            A list of dicts. Each dict is required to have same set of keys.
+        headers:
+            Optional list of keys. Defines the order of columns.
+        delimit:
+            Delimiter character.
     '''
-    keys = dictlist[0].keys()
+    # Normalize to iterable
+    dictlist = iter(dictlist)
+    first = next(dictlist)
+    # Headers
+    if headers is None:
+        fieldnames = first.keys()
+    else:
+        fieldnames = headers
+    # Write
     with open(target_filename, 'w') as csvfile:
-        fieldnames = keys
         writer = csv.DictWriter(csvfile,
                                 fieldnames=fieldnames,
+                                lineterminator='\n',
                                 delimiter=delimit)
         writer.writeheader()
+        writer.writerow(first)
         for d in dictlist:
             writer.writerow(d)
