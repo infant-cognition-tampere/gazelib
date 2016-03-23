@@ -12,26 +12,10 @@ pp = PrettyPrinter(indent=4)
 import gazelib
 from gazelib.containers import CommonV1
 
-from .utils import get_temp_filepath, remove_temp_file, frange
-import jsonschema
-import difflib
+from .utils import (get_temp_filepath, remove_temp_file, frange,
+    get_fixture_filepath, load_sample, assert_files_equal)
+import jsonschema  # import ValidationError
 import os
-
-def get_fixture_filepath(sample_name):
-    '''
-    Create absolute filepath from sample filename.
-    '''
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    full_path = os.path.join(this_dir, 'fixtures', sample_name)
-    return full_path
-
-def load_sample(sample_name):
-    '''
-    Reads from fixtures/ directory
-    Access e.g. by: load_sample('sample.common.json')
-    '''
-    full_path = get_fixture_filepath(sample_name)
-    return gazelib.io.load_json(full_path)
 
 
 def assert_valid(self, common_raw, msg='Invalid CommonV1 structure'):
@@ -41,32 +25,6 @@ def assert_valid(self, common_raw, msg='Invalid CommonV1 structure'):
     try:
         CommonV1.validate(common_raw)
     except:
-        self.fail(msg)
-
-
-def assert_files_equal(self, filepath1, filepath2,
-                       msg='Files should be equal but are not'):
-    '''
-    Assert the content of two files are equal. Do not care about empty spaces
-    at the end of the files.
-    '''
-    with open(filepath1, 'r') as f1, open(filepath2, 'r') as f2:
-        # Two lists of lines. Each element is a string that ends with '\n'
-        s1 = list(f1.readlines())
-        s2 = list(f2.readlines())
-    # Trim new lines because it causes problems because
-    # hand-written JSON includes trailing empty line where
-    # the generated JSON does not.
-    s1 = list(map(lambda l: l.rstrip('\n'), s1))
-    s2 = list(map(lambda l: l.rstrip('\n'), s2))
-    # File names for nice message.
-    b1 = filepath1
-    b2 = filepath2
-    diffs = list(difflib.unified_diff(s1, s2, b1, b2, lineterm='', n=0))
-    if len(diffs) != 0:
-        # Files not equal
-        diffmsg = '\n'.join(diffs)
-        msg = msg + ':\n' + diffmsg
         self.fail(msg)
 
 
