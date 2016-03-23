@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 name = 'gazelib'
-version = '1.2.3'
+version = '1.2.4'
 description = 'Software tools to manage and analyze data from eye-trackers'
 url = 'https://github.com/infant-cognition-tampere/gazelib'
 author = 'Akseli Palen'
@@ -39,7 +39,9 @@ keywords = 'eye-tracking data'
 
 # You can just specify the packages manually here if your project is
 # simple. Or you can use find_packages().
-packages = ['gazelib']
+# packages = ['gazelib']
+# Note: to use find_packages, it must be run on upper level. Otherwise
+# it will be run each time the package becomes imported. See setup.py
 
 # Alternatively, if you want to distribute just a my_module.py, uncomment
 # this:

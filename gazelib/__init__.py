@@ -2,12 +2,12 @@
 '''
 Gazelib, a toolkit for gaze analysis.
 '''
-from . import package
+from gazelib import package
 __version__ = package.version  # noqa
 
-from . import containers  # noqa
-from . import io  # noqa
-from . import legacy  # noqa
+from gazelib import containers  # noqa
+from gazelib import io  # noqa
+from gazelib import legacy  # noqa
 # import gazelib.settings  # noqa
-from . import statistics  # noqa
+from gazelib import statistics  # noqa
 # import gazelib.validation  # noqa

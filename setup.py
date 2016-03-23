@@ -53,7 +53,11 @@ def get_version(module_name, filename):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-# Read setup parameters from package.py
+# Read setup parameters from gazelib/package.py
+# This way Sphinx can access package information.
 pkg_info = get_package_info('gazelib')
+# Keep costly processing out from package.py so that they wont be
+# executed each time the package is imported.
 pkg_info['long_description'] = get_long_description()
+pkg_info['packages'] = find_packages(exclude=['tests*'])
 setup(**pkg_info)
