@@ -5,8 +5,7 @@ Classes that store the gaze data and can be fed to analysis functions.
 from .validation import is_list_of_strings, is_real
 from .settings import min_event_slice_overlap_seconds as min_overlap
 from .statistics import arithmetic_mean, deltas
-from .io import (load_json, write_json, write_fancy_json,
-                        write_dictlist_as_csv)
+from .io import load_json, write_json, write_fancy_json, write_dictlist_as_csv
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
