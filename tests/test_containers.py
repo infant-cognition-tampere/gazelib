@@ -123,6 +123,15 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(t1, 0.5)
         self.assertEqual(dur, 1.0)
 
+    def test_get_relative_time_by_index(self):
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
+
+        t = c.get_relative_time_by_index('ecg', 3)
+        self.assertEqual(t, 0.03)
+
+        f = lambda: c.get_relative_time_by_index('ecg', 100)
+        self.assertRaises(IndexError, f)
+
     def test_slice_by_relative_time(self):
 
         raw = load_sample('sample.common.json')

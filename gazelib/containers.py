@@ -303,6 +303,13 @@ class CommonV1(object):
 
         return max(tl_max, ev_max)
 
+    def get_relative_time_by_index(self, timeline_name, index):
+        '''
+        Return relative time on the timeline at index.
+        '''
+        tl = self.get_timeline(timeline_name)
+        return tl[index]
+
     def get_duration(self):
         '''
         Difference in seconds between the smallest and largest time point.
