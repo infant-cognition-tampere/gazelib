@@ -5,34 +5,34 @@ except ImportError:
 
 from gazelib import statistics as unit
 
-class TestUtils(unittest.TestCase):
+class TestStatistics(unittest.TestCase):
 
     def test_deltas(self):
 
         l = [1, 2, 3, 4, 5]
-        self.assertListEqual(unit.utils.deltas(l), [1, 1, 1, 1])
+        self.assertListEqual(unit.deltas(l), [1, 1, 1, 1])
         l = [-1, 0, 1, 2]
-        self.assertListEqual(unit.utils.deltas(l), [1, 1, 1])
+        self.assertListEqual(unit.deltas(l), [1, 1, 1])
         l = [1, 0, 1, 0, -1]
-        self.assertListEqual(unit.utils.deltas(l), [-1, 1, -1, -1])
+        self.assertListEqual(unit.deltas(l), [-1, 1, -1, -1])
 
     def test_arithmetic_mean(self):
 
         l = [1, 2, 3]
-        self.assertEqual(unit.utils.arithmetic_mean(l), 2.0)
+        self.assertEqual(unit.arithmetic_mean(l), 2.0)
         l = []
-        self.assertEqual(unit.utils.arithmetic_mean(l), None)
+        self.assertEqual(unit.arithmetic_mean(l), None)
         l = [None, 1]
-        self.assertEqual(unit.utils.arithmetic_mean(l), 1.0)
+        self.assertEqual(unit.arithmetic_mean(l), 1.0)
 
     def test_weighted_arithmetic_mean(self):
 
         l = [1, 5, 1]
         w = [1, 0, 1]
-        self.assertEqual(unit.utils.weighted_arithmetic_mean(l, w), 1.0)
+        self.assertEqual(unit.weighted_arithmetic_mean(l, w), 1.0)
         l = [2, 5, 0]
         w = [1, None, 1]
-        self.assertEqual(unit.utils.weighted_arithmetic_mean(l, w), 1.0)
+        self.assertEqual(unit.weighted_arithmetic_mean(l, w), 1.0)
 
 if __name__ == '__main__':
     unittest.main()
