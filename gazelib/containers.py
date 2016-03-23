@@ -2,10 +2,11 @@
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
-from .validation import is_list_of_strings, is_real
-from .settings import min_event_slice_overlap_seconds as min_overlap
-from .statistics.utils import arithmetic_mean, deltas
-from .io import load_json, write_json, write_fancy_json, write_dictlist_as_csv
+from gazelib.validation import is_list_of_strings, is_real
+from gazelib.settings import min_event_slice_overlap_seconds as min_overlap
+from gazelib.statistics import arithmetic_mean, deltas
+from gazelib.io import (load_json, write_json, write_fancy_json,
+                        write_dictlist_as_csv)
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
@@ -303,6 +304,13 @@ class CommonV1(object):
 
         return max(tl_max, ev_max)
 
+    def get_relative_time_by_index(self, timeline_name, index):
+        '''
+        Return relative time on the timeline at index.
+        '''
+        tl = self.get_timeline(timeline_name)
+        return tl[index]
+
     def get_duration(self):
         '''
         Difference in seconds between the smallest and largest time point.
@@ -522,6 +530,10 @@ class CommonV1(object):
         return self.slice_by_relative_time(range_start, range_end)
 
     def iter_slices_by_tag(self, tag, limit_to=None):
+        '''DEPRECATED. Use iter_by_tag instead.'''
+        return self.iter_by_tag(tag, limit_to)
+
+    def iter_by_tag(self, tag, limit_to=None):
         '''
         Slice to multiple portions. E.g. if there is ten events with "trial"
         tag, returns iterable over ten slices, one for each tag.
