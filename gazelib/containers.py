@@ -522,6 +522,10 @@ class CommonV1(object):
         return self.slice_by_relative_time(range_start, range_end)
 
     def iter_slices_by_tag(self, tag, limit_to=None):
+        '''DEPRECATED. Use iter_by_tag instead.'''
+        return self.iter_by_tag(tag, limit_to)
+
+    def iter_by_tag(self, tag, limit_to=None):
         '''
         Slice to multiple portions. E.g. if there is ten events with "trial"
         tag, returns iterable over ten slices, one for each tag.
