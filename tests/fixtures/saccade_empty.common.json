@@ -1,0 +1,27 @@
+{
+    "environment": {},
+    "events": [],
+    "global_posix_time": 0,
+    "schema": "gazelib/common/v1",
+    "streams": {
+        "gazelib/gaze/left_eye_x_relative": {
+            "timeline": "eyetracker",
+            "values": []
+        },
+        "gazelib/gaze/left_eye_y_relative": {
+            "timeline": "eyetracker",
+            "values": []
+        },
+        "gazelib/gaze/right_eye_x_relative": {
+            "timeline": "eyetracker",
+            "values": []
+        },
+        "gazelib/gaze/right_eye_y_relative": {
+            "timeline": "eyetracker",
+            "values": []
+        }
+    },
+    "timelines": {
+        "eyetracker": []
+    }
+}
