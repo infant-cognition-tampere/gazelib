@@ -91,6 +91,31 @@ class TestCommonV1(unittest.TestCase):
         f = lambda: c.get_relative_time_by_index('ecg', 100)
         self.assertRaises(IndexError, f)
 
+    def test_get_stream_values_and_timeline(self):
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
+
+        s = c.get_stream('ecg/voltage_V')
+        self.assertIn('values', s)
+        self.assertIn('timeline', s)
+
+        f = lambda: c.get_stream('fox')
+        self.assertRaises(CommonV1.MissingStreamException, f)
+
+        v = c.get_stream_values('ecg/voltage_V')
+        self.assertEqual(len(v), 10)
+
+        f = lambda: c.get_stream_values('fox')
+        self.assertRaises(CommonV1.MissingStreamException, f)
+
+        f = lambda: c.get_stream_values('')
+        self.assertRaises(CommonV1.MissingStreamException, f)
+
+        t = c.get_stream_timeline_name('ecg/voltage_V')
+        self.assertEqual(t, 'ecg')
+
+        f = lambda: c.get_stream_timeline_name('fox')
+        self.assertRaises(CommonV1.MissingStreamException, f)
+
     def test_slice_by_relative_time(self):
 
         raw = load_fixture('sample.common.json')

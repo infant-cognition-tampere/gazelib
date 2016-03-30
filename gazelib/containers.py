@@ -28,6 +28,10 @@ class CommonV1(object):
         '''Raised if a timeline cannot be found.'''
         pass
 
+    class MissingStreamException(Exception):
+        '''Raised if a stream cannot be found.'''
+        pass
+
     class InvalidTimelineException(Exception):
         '''Raised if a timeline does not fit the CommonV1 specification.'''
         pass
@@ -246,7 +250,11 @@ class CommonV1(object):
 
     def get_timeline(self, timeline_name):
         '''
-        Return timeline i.e. a list of relative times.
+        Return:
+            timeline i.e. a list of relative times.
+
+        Raise:
+            CommonV1.MissingTimelineException: if name not found.
         '''
         try:
             return self.raw['timelines'][timeline_name]
@@ -327,6 +335,32 @@ class CommonV1(object):
         Return list of names of provided streams.
         '''
         return list(self.raw['streams'].keys())
+
+    def get_stream(self, stream_name):
+        '''
+        Return: CommonV1 stream dict.
+        Raise: CommonV1.MissingStreamException: if name not found.
+        '''
+        try:
+            return self.raw['streams'][stream_name]
+        except KeyError:
+            str_name = str(stream_name)
+            raise CommonV1.MissingStreamException('Stream ' + str_name +
+                                                  ' not found.')
+
+    def get_stream_values(self, stream_name):
+        '''
+        Return: the full list of values of the stream.
+        Raise: CommonV1.MissingStreamException: if name not found.
+        '''
+        return self.get_stream(stream_name)['values']
+
+    def get_stream_timeline_name(self, stream_name):
+        '''
+        Return: the timeline name associated with the stream.
+        Raise: CommonV1.MissingStreamException: if name not found.
+        '''
+        return self.get_stream(stream_name)['timeline']
 
     def iter_events_by_tag(self, tag):
         '''
