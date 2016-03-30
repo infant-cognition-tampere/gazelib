@@ -3,6 +3,7 @@ import tempfile
 import gazelib
 from sys import float_info
 import difflib
+from deepdiff import DeepDiff
 
 
 def get_temp_filepath(file_name):
@@ -46,14 +47,21 @@ def get_fixture_filepath(sample_name):
     return full_path
 
 
-def load_sample(sample_name):
+def load_fixture(sample_name):
     '''
     Reads from fixtures/ directory
-    Access e.g. by: load_sample('sample.common.json')
+    Access e.g. by: load_fixture('sample.common.json')
     '''
     full_path = get_fixture_filepath(sample_name)
     return gazelib.io.load_json(full_path)
 
+def assert_deep_equal(self, obj1, obj2,
+                      msg='Objects should be equal but are not'):
+    '''
+    Assert the two JSON compatible objects are deeply equal.
+    '''
+    dd = DeepDiff(obj1, obj2)
+    self.assertEqual(dd, {})
 
 def assert_files_equal(self, filepath1, filepath2,
                        msg='Files should be equal but are not'):

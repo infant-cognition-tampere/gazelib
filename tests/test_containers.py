@@ -13,7 +13,8 @@ import gazelib
 from gazelib.containers import CommonV1
 
 from .utils import (get_temp_filepath, remove_temp_file, frange,
-    get_fixture_filepath, load_sample, assert_files_equal)
+    get_fixture_filepath, load_fixture, assert_files_equal,
+    assert_deep_equal)
 import jsonschema  # import ValidationError
 import os
 
@@ -40,8 +41,8 @@ class TestCommonV1(unittest.TestCase):
         assert_valid(self, c.raw)
 
     def test_validate(self):
-        raw = load_sample('sample.common.json')
-        subraw = load_sample('subsample.common.json')
+        raw = load_fixture('sample.common.json')
+        subraw = load_fixture('subsample.common.json')
 
         # Ensure fixtures are valid
         assert_valid(self, raw)
@@ -70,7 +71,7 @@ class TestCommonV1(unittest.TestCase):
         self.assertIsNone(c.convert_to_relative_time(None))
 
     def test_get_start_end_time(self):
-        subraw = load_sample('subsample.common.json')
+        subraw = load_fixture('subsample.common.json')
         subg = CommonV1(subraw)
 
         t0 = subg.get_relative_start_time()
@@ -92,19 +93,17 @@ class TestCommonV1(unittest.TestCase):
 
     def test_slice_by_relative_time(self):
 
-        raw = load_sample('sample.common.json')
-        subraw = load_sample('subsample.common.json')
+        raw = load_fixture('sample.common.json')
+        subraw = load_fixture('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
         sliceg = g.slice_by_relative_time(0.05, 0.11)
-
-        dd = DeepDiff(sliceg.raw, subg.raw)
-        self.assertEqual(dd, {})
+        assert_deep_equal(self, sliceg.raw, subg.raw)
 
     def test_slice_by_global_time(self):
-        raw = load_sample('sample.common.json')
-        subraw = load_sample('subsample.common.json')
+        raw = load_fixture('sample.common.json')
+        subraw = load_fixture('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
@@ -118,8 +117,8 @@ class TestCommonV1(unittest.TestCase):
 
     def test_slice_by_timeline(self):
 
-        raw = load_sample('sample.common.json')
-        subraw = load_sample('subsample.common.json')
+        raw = load_fixture('sample.common.json')
+        subraw = load_fixture('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
@@ -140,8 +139,8 @@ class TestCommonV1(unittest.TestCase):
 
     def test_slice_by_tag(self):
 
-        raw = load_sample('sample.common.json')
-        subraw = load_sample('subsample.common.json')
+        raw = load_fixture('sample.common.json')
+        subraw = load_fixture('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
@@ -155,7 +154,7 @@ class TestCommonV1(unittest.TestCase):
 
     def test_iter_by_tag(self):
 
-        raw = load_sample('sample.common.json')
+        raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 
         slices = list(g.iter_by_tag('test/center'))
@@ -175,7 +174,7 @@ class TestCommonV1(unittest.TestCase):
 
     def test_add_environment(self):
 
-        raw = load_sample('sample.common.json')
+        raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 
         g.add_environment('test_env', 123)
@@ -190,7 +189,7 @@ class TestCommonV1(unittest.TestCase):
 
     def test_add_stream(self):
 
-        raw = load_sample('sample.common.json')
+        raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 
         tlex = CommonV1.MissingTimelineException
@@ -249,7 +248,7 @@ class TestCommonV1(unittest.TestCase):
 
     def test_add_event(self):
 
-        raw = load_sample('sample.common.json')
+        raw = load_fixture('sample.common.json')
         g = CommonV1(raw)
 
         ieex = CommonV1.InvalidEventException
