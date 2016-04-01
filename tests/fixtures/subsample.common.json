@@ -1,10 +1,10 @@
 {
   "schema": "gazelib/common/v1",
   "environment": {},
-  "global_posix_time": 1234567890,
+  "time_reference": 1234567890000000,
   "timelines": {
-    "eyetracker": [0.06, 0.08, 0.10],
-    "ecg": [0.05, 0.06, 0.07, 0.08, 0.09]
+    "eyetracker": [60000, 80000, 100000],
+    "ecg": [50000, 60000, 70000, 80000, 90000]
   },
   "streams": {
     "gaze/left_eye_pupil_mm": {
@@ -20,7 +20,7 @@
   "events": [
     {
       "tags": ["test/wide"],
-      "range": [-0.5, 0.5],
+      "range": [50000, 110000],
       "extra": {
         "description": "over the timeline ranges",
         "test/value": 1
@@ -28,21 +28,21 @@
     },
     {
       "tags": ["test/center"],
-      "range": [0.04, 0.08],
+      "range": [50000, 80000],
       "extra": {
         "description": "range ends at timerange values"
       }
     },
     {
       "tags": ["test/center"],
-      "range": [0.05, 0.07],
+      "range": [50000, 70000],
       "extra": {
         "description": "range ends between timerange values"
       }
     },
     {
       "tags": ["test/last-half"],
-      "range": [0.05, 0.12]
+      "range": [50000, 110000]
     }
   ]
 }

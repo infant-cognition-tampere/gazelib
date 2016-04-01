@@ -4,6 +4,8 @@ import gazelib
 from sys import float_info
 import difflib
 from deepdiff import DeepDiff
+from pprint import PrettyPrinter
+pp = PrettyPrinter(indent=4)
 
 
 def get_temp_filepath(file_name):
@@ -32,7 +34,8 @@ def frange(x, y, jump=1.0):
     '''
     i = 0
     x0 = x
-    while x + float_info.epsilon < y:
+    epsilon = jump / 2.0
+    while x + epsilon < y:
         yield x
         i += 1
         x = x0 + i * jump
@@ -61,7 +64,9 @@ def assert_deep_equal(self, obj1, obj2,
     Assert the two JSON compatible objects are deeply equal.
     '''
     dd = DeepDiff(obj1, obj2)
-    self.assertEqual(dd, {})
+    if dd != {}:
+        msg = pp.pformat(dd)
+        self.fail(msg)
 
 def assert_files_equal(self, filepath1, filepath2,
                        msg='Files should be equal but are not'):

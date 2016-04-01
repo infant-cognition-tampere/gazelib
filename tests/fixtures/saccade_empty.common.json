@@ -1,7 +1,7 @@
 {
     "environment": {},
     "events": [],
-    "global_posix_time": 0,
+    "time_reference": 0,
     "schema": "gazelib/common/v1",
     "streams": {
         "gazelib/gaze/left_eye_x_relative": {

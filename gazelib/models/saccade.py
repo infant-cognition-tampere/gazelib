@@ -53,15 +53,21 @@ def fit(g):
         raise CommonV1.InsufficientDataException('Cannot find saccade from' +
                                                  'empty data.')
 
+    # Get timelines to get times from
+    l_tl_name = g.get_stream_timeline_name('gazelib/gaze/left_eye_x_relative')
+    r_tl_name = g.get_stream_timeline_name('gazelib/gaze/right_eye_x_relative')
+
     # Convert to times
     llensource = len(lresults['source_points'])
     rlensource = len(rresults['source_points'])
     llensaccade = len(lresults['saccade_points'])
     rlensaccade = len(rresults['saccade_points'])
-    lstart = g.get_relative_time_by_index(llensource - 1)
-    rstart = g.get_relative_time_by_index(rlensource - 1)
-    lend = g.get_relative_time_by_index(llensource + llensaccade - 1)
-    rend = g.get_relative_time_by_index(rlensource + rlensaccade - 1)
+    lstart = g.get_relative_time_by_index(l_tl_name, llensource - 1)
+    rstart = g.get_relative_time_by_index(r_tl_name, rlensource - 1)
+    lend = g.get_relative_time_by_index(l_tl_name,
+                                        llensource + llensaccade - 1)
+    rend = g.get_relative_time_by_index(r_tl_name,
+                                        rlensource + rlensaccade - 1)
     mean_start = arithmetic_mean([lstart, rstart])
     mean_end = arithmetic_mean([lend, rend])
 

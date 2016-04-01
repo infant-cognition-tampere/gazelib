@@ -1,6 +1,6 @@
-gazelib/time/seconds,gaze/left_eye_pupil_mm,gaze/left_eye_pupil_mm/confidence
-0.02,2.0,0.5
-0.04,2.2,1.0
-0.06,1.8,1.0
-0.08,2.2,1.0
-0.1,1.8,1.0
+gazelib/time/microseconds,gaze/left_eye_pupil_mm,gaze/left_eye_pupil_mm/confidence
+20000,2.0,0.5
+40000,2.2,1.0
+60000,1.8,1.0
+80000,2.2,1.0
+100000,1.8,1.0

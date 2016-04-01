@@ -4,11 +4,6 @@ try:
 except ImportError:
     import unittest
 
-from deepdiff import DeepDiff
-
-from pprint import PrettyPrinter
-pp = PrettyPrinter(indent=4)
-
 import gazelib
 from gazelib.containers import CommonV1
 
@@ -58,16 +53,16 @@ class TestCommonV1(unittest.TestCase):
         f = lambda: CommonV1.validate(subraw)
         self.assertRaises(jsonschema.ValidationError, f)
 
-    def test_global_and_relative_time_with_none(self):
+    def test_unix_and_relative_time_with_none(self):
         c = CommonV1(get_fixture_filepath('sample.common.json'))
 
-        gt = c.get_global_time()
+        gt = c.get_time_reference()
 
-        t = c.convert_to_global_time(5.0);
-        self.assertEqual(t - 5.0, gt)
-        self.assertEqual(c.convert_to_relative_time(t), 5.0)
+        t = c.convert_to_unix_time(5000000);
+        self.assertEqual(t - 5000000, gt)
+        self.assertEqual(c.convert_to_relative_time(t), 5000000)
 
-        self.assertIsNone(c.convert_to_global_time(None))
+        self.assertIsNone(c.convert_to_unix_time(None))
         self.assertIsNone(c.convert_to_relative_time(None))
 
     def test_get_start_end_time(self):
@@ -78,15 +73,15 @@ class TestCommonV1(unittest.TestCase):
         t1 = subg.get_relative_end_time()
         dur = subg.get_duration()
 
-        self.assertEqual(t0, -0.5)
-        self.assertEqual(t1, 0.5)
-        self.assertEqual(dur, 1.0)
+        self.assertEqual(t0, 50000)
+        self.assertEqual(t1, 110000)
+        self.assertEqual(dur, 60000)
 
     def test_get_relative_time_by_index(self):
         c = CommonV1(get_fixture_filepath('sample.common.json'))
 
         t = c.get_relative_time_by_index('ecg', 3)
-        self.assertEqual(t, 0.03)
+        self.assertEqual(t, 30000)
 
         f = lambda: c.get_relative_time_by_index('ecg', 100)
         self.assertRaises(IndexError, f)
@@ -123,7 +118,7 @@ class TestCommonV1(unittest.TestCase):
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
-        sliceg = g.slice_by_relative_time(0.05, 0.11)
+        sliceg = g.slice_by_relative_time(50000, 110000)
         assert_deep_equal(self, sliceg.raw, subg.raw)
 
     def test_slice_by_global_time(self):
@@ -132,20 +127,16 @@ class TestCommonV1(unittest.TestCase):
         g = gazelib.containers.CommonV1(raw)
         subg = gazelib.containers.CommonV1(subraw)
 
-        gt1 = g.convert_to_global_time(0.05)
-        gt2 = g.convert_to_global_time(0.11)
+        gt1 = g.convert_to_unix_time(50000)
+        gt2 = g.convert_to_unix_time(110000)
 
-        sliceg = g.slice_by_global_time(gt1, gt2)
-
-        dd = DeepDiff(sliceg.raw, subg.raw)
-        self.assertEqual(dd, {})
+        sliceg = g.slice_by_unix_time(gt1, gt2)
+        assert_deep_equal(self, sliceg.raw, subg.raw)
 
     def test_slice_by_timeline(self):
 
         raw = load_fixture('sample.common.json')
-        subraw = load_fixture('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
-        subg = gazelib.containers.CommonV1(subraw)
 
         # Test invalid timeline
         f = lambda: g.slice_by_timeline('foo', 5)
@@ -157,10 +148,8 @@ class TestCommonV1(unittest.TestCase):
 
         sliceg = g.slice_by_timeline('ecg', 5)
 
-        dd = DeepDiff(subg.raw, sliceg.raw)
-        # pp.pprint(dd)
-        # pp.pprint(sliceg.raw)
-        self.assertEqual(dd, {})
+        t = g.get_relative_time_by_index('ecg', 5)
+        self.assertEqual(sliceg.get_relative_start_time(), t)
 
     def test_slice_by_tag(self):
 
@@ -170,8 +159,7 @@ class TestCommonV1(unittest.TestCase):
         subg = gazelib.containers.CommonV1(subraw)
 
         sliceg = g.slice_by_tag('test/last-half')
-        dd = DeepDiff(subg.raw, sliceg.raw)
-        self.assertEqual(dd, {})
+        assert_deep_equal(self, subg.raw, sliceg.raw)
 
         # Reference by index
         slicec = g.slice_by_tag('test/center', index=1)
@@ -189,13 +177,10 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(slices[1].raw['events']), 4)  # no first-half
         self.assertEqual(len(slices[1].raw['timelines']['eyetracker']), 1)
 
-        #dd = DeepDiff(subg.raw, sliceg.raw)
-        #self.assertEqual(dd, {})
-
-    def test_set_global_posix_time(self):
+    def test_set_time_reference(self):
         c = CommonV1()
-        f = lambda: c.set_global_time(1234567890.123456)
-        self.assertRaises(CommonV1.InvalidGlobalTimeException, f)
+        f = lambda: c.set_time_reference(1234567890123456.1234)
+        self.assertRaises(CommonV1.InvalidTimeException, f)
 
     def test_add_environment(self):
 
@@ -254,7 +239,7 @@ class TestCommonV1(unittest.TestCase):
         Ensure add_timeline can handle generators and converts them to lists.
         '''
         c = CommonV1()
-        c.add_timeline('myline', frange(0.0, 100.0, 0.1))
+        c.add_timeline('myline', range(0, 100000000, 100000))
         c.add_stream('mystream', 'myline', frange(0.0, 200.0, 0.2),
                      frange(0.0, 1.0, 0.001))
         stream = c.raw['streams']['mystream']
@@ -266,7 +251,7 @@ class TestCommonV1(unittest.TestCase):
         Ensure add_timeline can handle generators and converts them to lists.
         '''
         c = CommonV1()
-        c.add_timeline('myline', frange(0.0, 100.0, 0.1))
+        c.add_timeline('myline', range(0, 100000000, 100000))
         tl = c.get_timeline('myline')
         self.assertEqual(len(tl), 1000)
         self.assertTrue(isinstance(tl, list))
@@ -278,13 +263,16 @@ class TestCommonV1(unittest.TestCase):
 
         ieex = CommonV1.InvalidEventException
 
-        f = lambda: g.add_event('my_tag', 0.0, 1.4)
+        f = lambda: g.add_event('my_tag', 0, 1400000)
         self.assertRaises(ieex, f)
 
-        f = lambda: g.add_event(['my_tag', 'my_tag2'], 'a', 1.4)
+        f = lambda: g.add_event('my_tag', 0, 1400000.123)
         self.assertRaises(ieex, f)
 
-        g.add_event(['my_tag', 'my_tag2'], 0.0, 1.4)
+        f = lambda: g.add_event(['my_tag', 'my_tag2'], 'a', 1400000)
+        self.assertRaises(ieex, f)
+
+        g.add_event(['my_tag', 'my_tag2'], 0, 1400000)
         l = list(g.iter_events_by_tag('my_tag'))
         self.assertEqual(len(l), 1)
 
@@ -321,7 +309,7 @@ class TestCommonV1(unittest.TestCase):
 
         fpath = get_temp_filepath('myfile.json')
         c = CommonV1()
-        c.set_global_time(0)
+        c.set_time_reference(0)
         c.save_as_json(fpath, human_readable=True)
         assert_files_equal(self, fpath,
                            get_fixture_filepath('minimal.common.json'))

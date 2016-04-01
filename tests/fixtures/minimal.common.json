@@ -1,8 +1,8 @@
 {
     "environment": {},
     "events": [],
-    "global_posix_time": 0,
     "schema": "gazelib/common/v1",
     "streams": {},
+    "time_reference": 0,
     "timelines": {}
 }

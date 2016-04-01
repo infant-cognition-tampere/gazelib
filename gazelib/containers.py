@@ -2,14 +2,19 @@
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
-from .validation import is_list_of_strings, is_real
-from .settings import min_event_slice_overlap_seconds as min_overlap
+from .validation import is_list_of_strings, is_integer
+# from .settings import min_event_slice_overlap_seconds as min_overlap
 from .statistics import arithmetic_mean, deltas
 from .io import load_json, write_json, write_fancy_json, write_dictlist_as_csv
 from time import time as get_current_posix_time
 from deepdiff import DeepDiff
 from bisect import bisect_left  # binary tree search tool
 from jsonschema import validate as validate_jsonschema
+
+
+def get_current_time_reference():
+    '''Get current POSIX time in microseconds'''
+    return int(get_current_posix_time() * 10**6)
 
 
 class CommonV1(object):
@@ -48,8 +53,8 @@ class CommonV1(object):
         '''Raised if a timeline does not fit the CommonV1 specification.'''
         pass
 
-    class InvalidGlobalTimeException(Exception):
-        '''Raised if the global time is not an integer.'''
+    class InvalidTimeException(Exception):
+        '''Raised if a time is not an integer.'''
         pass
 
     # JSON Schema to validate raw input
@@ -64,7 +69,7 @@ class CommonV1(object):
                 'type': 'string',
                 'pattern': 'gazelib/common/v1'
             },
-            'global_posix_time': {
+            'time_reference': {
                 'type': 'integer'
             },
             'environment': {
@@ -79,7 +84,7 @@ class CommonV1(object):
                     '.+': {
                         'type': 'array',
                         'items': {
-                            'type': 'number'
+                            'type': 'integer'
                         }
                     }
                 }
@@ -132,7 +137,7 @@ class CommonV1(object):
                 }
             }
         },
-        'required': ['schema', 'global_posix_time', 'environment',
+        'required': ['schema', 'time_reference', 'environment',
                      'timelines', 'streams', 'events']
     }
 
@@ -160,10 +165,10 @@ class CommonV1(object):
 
         if r is None:
             # Construct with empty.
-            now = int(get_current_posix_time())
+            now = get_current_time_reference()
             r = {
                 'schema': 'gazelib/common/v1',
-                'global_posix_time': now,
+                'time_reference': now,
                 'environment': {},
                 'timelines': {},
                 'streams': {},
@@ -223,19 +228,19 @@ class CommonV1(object):
 
     # Accessors
 
-    def convert_to_global_time(self, relative_time_seconds):
-        '''Return global time in seconds (float)'''
-        if relative_time_seconds is None:
+    def convert_to_unix_time(self, relative_time_micros):
+        '''Return unix time in microseconds (int)'''
+        if relative_time_micros is None:
             return None
-        gt = self.raw['global_posix_time']
-        return gt + relative_time_seconds
+        tr = self.raw['time_reference']
+        return tr + relative_time_micros
 
-    def convert_to_relative_time(self, global_time_seconds):
-        '''Return relative time in seconds (float)'''
-        if global_time_seconds is None:
+    def convert_to_relative_time(self, unix_time_micros):
+        '''Return relative time in microseconds (int)'''
+        if unix_time_micros is None:
             return None
-        gt = self.raw['global_posix_time']
-        return global_time_seconds - gt
+        gt = self.raw['time_reference']
+        return unix_time_micros - gt
 
     def get_environment(self, env_name):
         '''
@@ -265,7 +270,7 @@ class CommonV1(object):
 
     def get_timeline_mean_interval(self, timeline_name):
         '''
-        Return unbiased mean interval in seconds, measured over the timeline.
+        Return mean interval in microseconds, measured over the timeline.
         '''
         try:
             tl = self.raw['timelines'][timeline_name]
@@ -275,11 +280,11 @@ class CommonV1(object):
             raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
                                                     ' not found.')
 
-    def get_global_time(self):
+    def get_time_reference(self):
         '''
-        Return the global reference time as seconds from unix epoch.
+        Return the time reference as microseconds from unix epoch.
         '''
-        return self.raw['global_posix_time']
+        return self.raw['time_reference']
 
     def get_relative_start_time(self):
         '''
@@ -320,7 +325,7 @@ class CommonV1(object):
 
     def get_duration(self):
         '''
-        Difference in seconds between the smallest and largest time point.
+        Difference in microseconds between the smallest and largest time point.
         '''
         return self.get_relative_end_time() - self.get_relative_start_time()
 
@@ -401,23 +406,28 @@ class CommonV1(object):
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
-        Does not update global_posix_time because easier implementation.
+        Will slice events that are partially outside.
+        Will remove empty streams and events that are completely outside.
+        Does not update time_reference because easier implementation
+        and more efficient execution.
         '''
 
-        # Ensure correct order
+        # Ensure given range is in correct order
         self.assert_range_order(rel_start_time, rel_end_time,
                                 'rel_start_time', 'rel_end_time')
 
-        # The new copy
+        # The new copy of content. Insert sliced values to it.
+        # time reference, schema, and environment stay the same.
         slice_raw = {
             'schema': self.raw['schema'],
-            'global_posix_time': self.raw['global_posix_time'],
+            'time_reference': self.raw['time_reference'],
             'environment': self.raw['environment'],  # shallow copy!
             'timelines': {},
             'streams': {},
             'events': []
         }
 
+        # Streams first, then events.
         for stream_name, stream in self.raw['streams'].items():
 
             # Find indices from the original timeline
@@ -430,7 +440,7 @@ class CommonV1(object):
                 end_i = bisect_left(tl, rel_end_time)  # first after range
             # https://docs.python.org/3/library/bisect.html
 
-            # Slice timeline and substreams
+            # Slice timeline and streams
             # (TODO ensure that timeline slice is done only once)
             if end_i is None:
                 sub_timeline = tl[first_i:]
@@ -460,30 +470,68 @@ class CommonV1(object):
         #   timelines, values, and confidencies are cut
         #   empty timelines are not included
 
-        # Keep events that overlap with the time range.
+        def copy_event(event):
+            '''Return copy. Extra is shallow copied.'''
+            ev = {
+                'tags': list(event['tags']),
+                'range': list(event['range'])
+            }
+            if 'extra' in event:
+                ev['extra'] = event['extra']
+            return ev
+
+        # Then events.
+        # Slice events that overlap with the time range.
+        # Keep events that are inside.
+        # Remove events that are outside.
         for event in self.raw['events']:
             ev_start = event['range'][0]
             ev_end = event['range'][1]
 
-            # Due to rounding errors, let us not include events that only
-            # slightly overlap with the range.
+            # # A false approach:
+            # # Force into the range
+            # upper_limit = rel_end_time
+            # lower_limit = rel_start_time
+            # f_ev_start = max(min(ev_start, upper_limit), lower_limit)
+            # f_ev_end = max(min(ev_end, upper_limit), lower_limit)
+            # # If event duration 0, it is outside.
+            # # This would accidentally remove purposely 0 duration events.
+            # # Testing if 0 duration event would be at begin or end
+            # # accidentally removes events that needs to be there.
+
             if rel_end_time is None:
-                limit_start = rel_start_time + min_overlap
-                if limit_start < ev_end:
-                    slice_raw['events'].append(event)
+                if rel_start_time < ev_end:
+                    # Event overlaps with the slice
+                    if ev_start < rel_start_time:
+                        # Event only partially overlaps. Copy & modify.
+                        nev = copy_event(event)
+                        nev['range'][0] = rel_start_time
+                    else:
+                        # Event inside the slice. Add it.
+                        nev = event
+                    slice_raw['events'].append(nev)
             else:
-                limit_end = rel_end_time - min_overlap
-                limit_start = rel_start_time + min_overlap
-                if ev_start < limit_end and limit_start < ev_end:
-                    slice_raw['events'].append(event)
+                if ev_start < rel_end_time and rel_start_time < ev_end:
+                    # Event overlaps with the slice
+                    upper_limit = rel_end_time
+                    lower_limit = rel_start_time
+                    # Limit event range
+                    nev_start = max(min(ev_start, upper_limit), lower_limit)
+                    nev_end = max(min(ev_end, upper_limit), lower_limit)
+                    nev = copy_event(event)
+                    nev['range'] = [nev_start, nev_end]
+                    # Add the event.
+                    slice_raw['events'].append(nev)
 
         return CommonV1(slice_raw)
 
-    def slice_by_global_time(self, start_time, end_time=None):
+    def slice_by_unix_time(self, start_time, end_time=None):
         '''
-        Return new CommonV1 object with data only in the time range.
-            Updates the global_posix_time to start_time
-                to minimize representation size.
+        Parameters:
+            start_time: unix time in microseconds
+            end_time: unix time in microseconds
+
+        Return new CommonV1 object with data only from the time range.
         '''
 
         # Ensure correct order
@@ -674,7 +722,7 @@ class CommonV1(object):
             timeline_name
                 A string that will be referenced from the streams.
             timeline_values
-                An iterable, will be converted to list.
+                An iterable of integer microseconds. Will be converted to list.
         '''
         if type(timeline_name) is str and hasattr(timeline_values, '__iter__'):
             self.raw['timelines'][timeline_name] = list(timeline_values)
@@ -689,15 +737,15 @@ class CommonV1(object):
             tags
                 A list of tag strings.
             start_time
-                A relative time in seconds. The starting time of the event.
+                A relative time in microseconds. The starting time of event.
             end_time
-                A relative time in seconds. The ending time of the event.
+                A relative time in microseconds. The ending time of event.
             extra
                 An optional place for extra info. Typically a dict.
         '''
         if not is_list_of_strings(tags):
             raise CommonV1.InvalidEventException('Invalid tag list')
-        if (not is_real(start_time)) or (not is_real(end_time)):
+        if (not is_integer(start_time)) or (not is_integer(end_time)):
             raise CommonV1.InvalidEventException('Invalid range')
         new_event = {
             'tags': tags,
@@ -708,21 +756,21 @@ class CommonV1(object):
 
         self.raw['events'].append(new_event)
 
-    def set_global_time(self, seconds_from_epoch):
+    def set_time_reference(self, microseconds_from_epoch):
         '''
         Can be used to anonymize data.
 
         Parameter:
-            seconds_from_epoch, integer.
+            microseconds_from_epoch, integer.
 
         Raise:
-            InvalidGlobalTimeException if not integer.
+            InvalidTimeException if not integer.
         '''
-        if isinstance(seconds_from_epoch, int):
-            # Note: what if
-            self.raw['global_posix_time'] = seconds_from_epoch
+        if isinstance(microseconds_from_epoch, int):
+            # Note: what if long
+            self.raw['time_reference'] = microseconds_from_epoch
         else:
-            raise CommonV1.InvalidGlobalTimeException('Must be integer.')
+            raise CommonV1.InvalidTimeException('Must be integer.')
 
     # IO
 
@@ -736,7 +784,7 @@ class CommonV1(object):
         tl = self.get_timeline(timeline_name)
 
         # Build the headers in practical order.
-        headers = ['gazelib/time/seconds']
+        headers = ['gazelib/time/microseconds']
 
         # Find streams on the timeline
         streams = {}
@@ -753,7 +801,7 @@ class CommonV1(object):
         def iterstreams():
             for index in range(len(tl)):
                 d = {}
-                d['gazelib/time/seconds'] = tl[index]
+                d['gazelib/time/microseconds'] = tl[index]
                 for stream_name, stream in streams.items():
                     d[stream_name] = stream[index]
                 yield d

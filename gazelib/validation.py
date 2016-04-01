@@ -41,3 +41,8 @@ def is_list_of_strings(l):
 
 def is_real(r):
     return isinstance(r, numbers.Real)
+
+
+def is_integer(n):
+    '''See also http://stackoverflow.com/a/3501408/638546'''
+    return isinstance(n, numbers.Integral)
