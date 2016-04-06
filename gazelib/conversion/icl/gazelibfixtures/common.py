@@ -180,7 +180,7 @@ def convert(gazedata_file_path, experiment_config_file_path, trial_config_id):
             raise ValueError()
         if tag == 'Wait':
             return 'icl/experiment/reaction/period/wait'
-        if tag == 'Target':
+        if tag == 'Target' or tag == 'midbox':
             return 'icl/experiment/reaction/period/target'
         raise utils.ConversionException('Unexpected tag value: ' + str(tag))
 
