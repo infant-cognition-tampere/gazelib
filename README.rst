@@ -29,6 +29,9 @@ With `pip
 
     $ pip install gazelib
 
+Development version::
+
+    $ pip install git+https://github.com/infant-cognition-tampere/gazelib.git@develop
 
 
 Docs
