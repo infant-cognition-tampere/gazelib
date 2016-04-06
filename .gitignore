@@ -69,3 +69,7 @@ target/
 
 # Jupyter
 .ipynb_checkpoints
+
+# Project specific
+/playground.py
+/index.html
