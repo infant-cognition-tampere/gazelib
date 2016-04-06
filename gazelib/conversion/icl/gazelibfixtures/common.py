@@ -170,50 +170,35 @@ def convert(gazedata_file_path, experiment_config_file_path, trial_config_id):
 
     # Build events
 
-    # ICL Tags
-    # End time of a tag is the start time of the next.
-    current_start_time = None
-    current_common_tag = None
-    current_end_time = None  # For the last tag only
-    previous_time = None     # For the last tag only
-    for gazepoint in gd:
-        tag = gazepoint['tag']
+    #######
+    # ICL experiment period tags
+    #######
+    def value_converter(r):
+        tag = r['tag']
         # Skip nones
         if tag == '':
-            continue
+            raise ValueError()
         if tag == 'Wait':
-            new_common_tag = 'icl/experiment/reaction/period/wait'
-        elif tag == 'Target':
-            new_common_tag = 'icl/experiment/reaction/period/target'
-        else:
-            # Unknown tag
-            raise Exception('Unknown tag:' + str(tag))
+            return 'icl/experiment/reaction/period/wait'
+        if tag == 'Target':
+            return 'icl/experiment/reaction/period/target'
+        raise utils.ConversionException('Unexpected tag value: ' + str(tag))
 
-        current_time = get_relative_time(gazepoint)
+    def time_converter(r):
+        return get_relative_time(r)
 
-        if new_common_tag != current_common_tag:
-            # New tag observed.
-            if current_common_tag is not None:
-                # store previous.
-                c.add_event([current_common_tag], current_start_time,
-                            current_time)
-            # Start collecting a new tag
-            current_start_time = current_time
-            current_common_tag = new_common_tag
-        # For the last tag, estimate the sample interval (1 / sampling rate)
-        # because the event range end is exclusive.
-        if previous_time is not None:
-            current_end_time = current_time + (current_time - previous_time)
-        previous_time = current_time
-    # Last tag, special handling.
-    c.add_event([current_common_tag], current_start_time, current_end_time)
-
-    # Experiment period tags
+    tag_ranges = utils.split_to_ranges_at_change_in_value(gd,
+                                                          value_converter,
+                                                          time_converter)
+    for tag in tag_ranges:
+        c.add_event([tag['value']], tag['start'], tag['end'])
 
     #########
     # Trials
     ##########
     def value_converter(r):
+        if r['trialnumber'] == '':
+            raise ValueError()
         return int(r['trialnumber'])
 
     def time_converter(r):
@@ -234,12 +219,14 @@ def convert(gazedata_file_path, experiment_config_file_path, trial_config_id):
     ##################
     def value_converter(r):
         # Split when at least one of the two changes
+        if r['stim'] == '' or r['aoi'] == '':
+            raise ValueError()
         return r['stim'] + '-' + r['aoi']
 
     ranges = utils.split_to_ranges_at_change_in_value(gd, value_converter,
                                                       time_converter)
     for r in ranges:
-        original_row = r['first_gazepoint']
+        original_row = r['first']
         image_index = int(original_row['stim'])
         aoi_index = int(original_row['aoi'])
         extra = {

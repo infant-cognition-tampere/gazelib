@@ -746,7 +746,8 @@ class CommonV1(object):
         if not is_list_of_strings(tags):
             raise CommonV1.InvalidEventException('Invalid tag list')
         if (not is_integer(start_time)) or (not is_integer(end_time)):
-            raise CommonV1.InvalidEventException('Invalid range')
+            rang = '[' + str(start_time) + ', ' + str(end_time) + ']'
+            raise CommonV1.InvalidEventException('Invalid range: ' + rang)
         if start_time > end_time:
             raise CommonV1.InvalidEventException('Invalid range order')
         new_event = {

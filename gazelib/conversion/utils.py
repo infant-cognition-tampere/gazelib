@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 
 
+class ConversionException(Exception):
+    pass
+
+
 def estimate_sampling_interval(times):
     '''
     Return mean interval in the given list of times.
+    Return None if times is empty or contains only one element.
     '''
 
     n = 0
-    dt_sum = 0
-    prev_t = 0
+    dt_sum = 0.0
+    prev_t = 0.0
     first = True
     for t in times:
         if first:
@@ -18,8 +23,10 @@ def estimate_sampling_interval(times):
         prev_t = t
         n += 1
 
-    assert n > 0, 'List of times must not be empty'
-    return dt_sum / n
+    if n < 2:
+        return None
+
+    return dt_sum / (n - 1)
 
 
 def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
@@ -39,58 +46,71 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
         time_converter
             A function that converts from raw row to times used
             in ranges.
+            Must return integer.
             Must raise ValueError if time cannot be converted.
             On ValueError the row will be skipped.
 
     Yields dicts:
         {
-          'start': 123.456,
-          'end': 234.567,
-          'value': anything
+          'start': <integer, start time of range, inclusive>,
+          'end': <integer, end time of range, exclusive>,
+          'value': <the value of the range>
+          'first': <first point in range>
         }
     '''
+
     # Estimate sample interval (i.e. 1 / sampling rate)
     times = map(time_converter, gd)
-    sample_interval = estimate_sampling_interval(times)
+    sample_interval = int(round(estimate_sampling_interval(times)))
 
+    num_yields = 0
+    cur_time = None
     previous_value = None
-    current_event = {}
+    event_to_yield = None
     for index, gazepoint in enumerate(gd):
         try:
-            value = value_converter(gazepoint)
+            cur_value = value_converter(gazepoint)
+            cur_time = time_converter(gazepoint)
+            # cur_time must be last because otherwise it would not always
+            # point to the time of last valid row. If last rows are
+            # invalid, the last event should still have correct time.
         except ValueError:
-            # Skip invalid
+            # Skip invalid but remember the previous value
             continue
 
         # Iterate until value differs from the previous
-        is_last = index == len(gd) - 1
-        if value == previous_value:
-            if not is_last:
-                continue
+        if cur_value == previous_value:
+            continue
 
-        # Assert: new value observed or last index
-        # Anyway, compute start and end time and store dict.
-        prev_range_end_time = time_converter(gazepoint)
-        next_range_start_time = prev_range_end_time
+        # Assert: different valid value observed
 
         # If first row, do not store dict but start the first dict.
-        is_first = index == 0
-        if not is_first:
+        if num_yields == 0:
+            event_to_yield = {
+                'start': cur_time,
+                'value': cur_value,
+                'first': gazepoint
+            }
+        else:
             # Range dict finished
-            current_event['end'] = prev_range_end_time
-            yield current_event
-        # Start building a new range dict
-        current_event = {
-            'start': next_range_start_time,
-            'value': value,
-            'first_gazepoint': gazepoint
-        }
-        # Special handling for the last range dict
-        if is_last:
-            # Last range dict finished
-            current_event['end'] = prev_range_end_time + sample_interval
+            event_to_yield['end'] = cur_time
+            yield event_to_yield
+            num_yields += 1
 
-        previous_value = value
+            # Start new one
+            event_to_yield = {
+                'start': cur_time,
+                'value': cur_value,
+                'first': gazepoint
+            }
+
+        previous_value = cur_value
+
+    # Handle the last event
+    if event_to_yield is not None:
+        event_to_yield['end'] = cur_time + sample_interval
+        yield event_to_yield
+        num_yields += 1
 
 
 class ExperimentConfiguration(object):
