@@ -113,12 +113,14 @@ def render_overview(common, output_html_filepath, title='Overview'):
 
     # Create a row for each event. X is time.
     evs = common.list_events()
+
     # Visualize in start time, then duration order.
     # Recent topmost, hence minus. If start time same, longest topmost.
     def order_key(ev):
         t0 = -ev['range'][0]
         dur = ev['range'][1] + t0
         return (t0, dur)
+
     evs = sorted(evs, key=order_key)
 
     fig = plotting.figure(title='Events', y_range=(-1, len(evs)),
@@ -137,9 +139,9 @@ def render_overview(common, output_html_filepath, title='Overview'):
         fig.line(x=[t0, t1], y=[i, i], line_width=6, line_color='black')
         # Mark where events start and end.
         fig.line(x=[t0, t0], y=[i - 0.1, i + 0.1],
-        line_width=2, line_color='black')
+                 line_width=2, line_color='black')
         fig.line(x=[t1, t1], y=[i - 0.1, i + 0.1],
-        line_width=2, line_color='black')
+                 line_width=2, line_color='black')
 
     figs.append(fig)
 
