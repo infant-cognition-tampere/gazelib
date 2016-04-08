@@ -367,14 +367,6 @@ class CommonV1(object):
         '''
         return self.get_stream(stream_name)['timeline']
 
-    def iter_events_by_tag(self, tag):
-        '''
-        Yields those events which have the given tag.
-        '''
-        for event in self.raw['events']:
-            if tag in event['tags']:
-                yield event
-
     def has_environments(self, env_names):
         '''
         Test if environments are available.
@@ -408,6 +400,12 @@ class CommonV1(object):
         Iterate over each event. See list_events to get list directly.
         '''
         return iter(self.raw['events'])
+
+    def iter_events_by_tag(self, tag):
+        '''Yield events that have the tag.'''
+        for ev in self.iter_events():
+            if tag in ev['tags']:
+                yield ev
 
     def iter_slices_by_tag(self, tag, limit_to=None):
         '''DEPRECATED. Use iter_by_tag instead.'''
