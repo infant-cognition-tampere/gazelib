@@ -11,7 +11,7 @@ from .utils import (get_temp_filepath, remove_temp_file, frange,
     get_fixture_filepath, load_fixture, assert_files_equal,
     assert_deep_equal)
 import jsonschema  # import ValidationError
-# import types
+import six  # Python version agnostic string type testing.
 import os
 
 
@@ -192,6 +192,13 @@ class TestCommonV1(unittest.TestCase):
         evs = g.list_events()
         self.assertIsInstance(evs, list)
         self.assertEqual(len(evs), 5)
+
+    def test_list_tags(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        tags = g.list_tags()
+        self.assertEqual(len(tags), 4)
+        self.assertIsInstance(tags[0], six.string_types)
 
     def test_set_time_reference(self):
         c = CommonV1()

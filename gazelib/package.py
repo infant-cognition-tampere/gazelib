@@ -57,7 +57,7 @@ install_requires = ['deepdiff', 'jsonschema', 'saccademodel', 'fixationmodel',
 # for example:
 # $ pip install -e .[dev,test]
 extras_require = {
-    'dev': ['Sphinx']
+    'dev': ['Sphinx', 'six']
 }
 
 # If there are data files included in your packages that need to be

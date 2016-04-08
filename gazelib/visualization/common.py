@@ -92,6 +92,7 @@ def render_overview(common, output_html_filepath, title='Overview'):
         figs.append(fig)
 
     # Events
+    # for ev in common.iter_events():
 
     # Lay out multiple figures
     p = plotting.vplot(*figs)

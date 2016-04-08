@@ -448,6 +448,18 @@ class CommonV1(object):
         '''Return list of names of provided streams.'''
         return list(self.raw['streams'].keys())
 
+    def list_tags(self):
+        '''Return list of unique tags in the events. Order is not defined.'''
+
+        tags = {}  # Looping lists is O(n). Searching a key is O(log(n))
+
+        for ev in self.iter_events():
+            for tag in ev['tags']:
+                if tag not in tags:
+                    tags[tag] = True
+
+        return list(tags.keys())
+
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.
