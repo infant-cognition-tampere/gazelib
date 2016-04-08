@@ -11,6 +11,7 @@ from .utils import (get_temp_filepath, remove_temp_file, frange,
     get_fixture_filepath, load_fixture, assert_files_equal,
     assert_deep_equal)
 import jsonschema  # import ValidationError
+# import types
 import os
 
 
@@ -176,6 +177,21 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(slices[0].raw['events']), 5)
         self.assertEqual(len(slices[1].raw['events']), 4)  # no first-half
         self.assertEqual(len(slices[1].raw['timelines']['eyetracker']), 1)
+
+    def test_iter_events(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.iter_events()
+        self.assertTrue(hasattr(evs, '__iter__'))
+        evsl = list(evs)
+        self.assertEqual(len(evsl), 5)
+
+    def test_list_events(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.list_events()
+        self.assertIsInstance(evs, list)
+        self.assertEqual(len(evs), 5)
 
     def test_set_time_reference(self):
         c = CommonV1()

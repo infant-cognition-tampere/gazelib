@@ -331,15 +331,15 @@ class CommonV1(object):
 
     def get_environment_names(self):
         '''
-        Return list of names of provided environments.
+        DEPRECATED: Use list_environment_names instead
         '''
-        return list(self.raw['environment'].keys())
+        return self.list_environment_names()
 
     def get_stream_names(self):
         '''
-        Return list of names of provided streams.
+        DEPRECATED: Use list_stream_names instead
         '''
-        return list(self.raw['streams'].keys())
+        return self.list_stream_names()
 
     def get_stream(self, stream_name):
         '''
@@ -402,6 +402,51 @@ class CommonV1(object):
         '''
         available_streams = self.get_stream_names()
         return all(st in available_streams for st in stream_names)
+
+    def iter_events(self):
+        '''
+        Iterate over each event. See list_events to get list directly.
+        '''
+        return iter(self.raw['events'])
+
+    def iter_slices_by_tag(self, tag, limit_to=None):
+        '''DEPRECATED. Use iter_by_tag instead.'''
+        return self.iter_by_tag(tag, limit_to)
+
+    def iter_by_tag(self, tag, limit_to=None):
+        '''
+        Slice to multiple portions. E.g. if there is ten events with "trial"
+        tag, returns iterable over ten slices, one for each tag.
+
+        Parameters
+            tag
+                string
+            limit_to
+                max number of slices to return. By default returns all.
+
+        Return
+            iterable of CommonV1 objects
+        '''
+
+        for index, event in enumerate(self.iter_events_by_tag(tag)):
+            range_start = event['range'][0]
+            range_end = event['range'][1]
+            yield self.slice_by_relative_time(range_start, range_end)
+            if limit_to is not None:
+                if index + 2 > limit_to:
+                    break
+
+    def list_environment_names(self):
+        '''Return list of names of provided environments.'''
+        return list(self.raw['environment'].keys())
+
+    def list_events(self):
+        '''Return full list of events'''
+        return self.raw['events']
+
+    def list_stream_names(self):
+        '''Return list of names of provided streams.'''
+        return list(self.raw['streams'].keys())
 
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
@@ -609,33 +654,6 @@ class CommonV1(object):
         range_end = target_event['range'][1]
 
         return self.slice_by_relative_time(range_start, range_end)
-
-    def iter_slices_by_tag(self, tag, limit_to=None):
-        '''DEPRECATED. Use iter_by_tag instead.'''
-        return self.iter_by_tag(tag, limit_to)
-
-    def iter_by_tag(self, tag, limit_to=None):
-        '''
-        Slice to multiple portions. E.g. if there is ten events with "trial"
-        tag, returns iterable over ten slices, one for each tag.
-
-        Parameters
-            tag
-                string
-            limit_to
-                max number of slices to return. By default returns all.
-
-        Return
-            iterable of CommonV1 objects
-        '''
-
-        for index, event in enumerate(self.iter_events_by_tag(tag)):
-            range_start = event['range'][0]
-            range_end = event['range'][1]
-            yield self.slice_by_relative_time(range_start, range_end)
-            if limit_to is not None:
-                if index + 2 > limit_to:
-                    break
 
     # Mutators
 

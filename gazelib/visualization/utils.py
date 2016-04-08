@@ -4,6 +4,7 @@
 def isNotNone(x):
     return x is not None
 
+
 def isNotNone2d(x, y):
     return x is not None and y is not None
 
@@ -41,6 +42,7 @@ def get_valid_sublists(l, validator=isNotNone):
         sublists.append(cur_sublist)
 
     return sublists
+
 
 def get_valid_sublists_2d(xs, ys, validator=isNotNone2d):
     '''
