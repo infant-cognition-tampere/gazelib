@@ -73,8 +73,12 @@ def render_overview(common, output_html_filepath, title='Overview'):
     def to_ms(micros):
         return int(round(micros / 1000))
 
+    #########
     # Streams
-    for stream_name in common.get_stream_names():
+    #########
+
+    stream_names = sorted(common.list_stream_names())
+    for stream_name in stream_names:
         tl_name = common.get_stream_timeline_name(stream_name)
         x = list(map(to_ms, common.get_timeline(tl_name)))
         y = common.get_stream_values(stream_name)
@@ -89,10 +93,55 @@ def render_overview(common, output_html_filepath, title='Overview'):
         for xs, ys in sl:
             fig.line(xs, ys, line_color='black')
 
+        # Emphasize gaps with red line.
+        # Loop pairwise, fill gaps.
+        # TODO Optimize. Currently very slow.
+        for i in range(len(sl) - 1):
+            xs0, ys0 = sl[i]
+            xs1, ys1 = sl[i + 1]
+            # Extrapolate from last known value
+            x0 = xs0[-1]
+            x1 = xs1[0]
+            y = ys0[-1]
+            fig.line(x=[x0, x1], y=[y, y], line_width=1, line_color='red')
+
         figs.append(fig)
 
+    ########
     # Events
-    # for ev in common.iter_events():
+    ########
+
+    # Create a row for each event. X is time.
+    evs = common.list_events()
+    # Visualize in start time, then duration order.
+    # Recent topmost, hence minus. If start time same, longest topmost.
+    def order_key(ev):
+        t0 = -ev['range'][0]
+        dur = ev['range'][1] + t0
+        return (t0, dur)
+    evs = sorted(evs, key=order_key)
+
+    fig = plotting.figure(title='Events', y_range=(-1, len(evs)),
+                          plot_width=1000,
+                          x_axis_label='time (ms)',
+                          toolbar_location=None)
+
+    # Hide event indices and draw custom text instead.
+    fig.yaxis.visible = None
+
+    for i, ev in enumerate(evs):
+        t0 = to_ms(ev['range'][0])
+        t1 = to_ms(ev['range'][1])
+        fig.text(text=[', '.join(ev['tags'])], y=[i + 0.1], x=[t0])
+
+        fig.line(x=[t0, t1], y=[i, i], line_width=6, line_color='black')
+        # Mark where events start and end.
+        fig.line(x=[t0, t0], y=[i - 0.1, i + 0.1],
+        line_width=2, line_color='black')
+        fig.line(x=[t1, t1], y=[i - 0.1, i + 0.1],
+        line_width=2, line_color='black')
+
+    figs.append(fig)
 
     # Lay out multiple figures
     p = plotting.vplot(*figs)
