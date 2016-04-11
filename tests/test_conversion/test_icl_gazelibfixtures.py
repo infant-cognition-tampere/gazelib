@@ -10,19 +10,18 @@ import os
 # Path to test fixtures
 here_path = os.path.dirname(os.path.realpath(__file__))
 fixture_path = os.path.join(here_path, 'fixtures')
-gazedata_path = os.path.join(fixture_path,
-                             'gazelibfixtures_shift_trial01.gazedata')
 exp_config_path = os.path.join(fixture_path,
-                               'gazelibfixtures_experiment-config.json')
-
+'gazelibfixtures_experiment-config.json')
+trial_path = os.path.join(fixture_path,
+'gazelibfixtures_shift_trial01.gazedata')
+trials_path = os.path.join(fixture_path,
+'gazelibfixtures_shift_trials00-02.gazedata')
 
 class TestGazelibFixturesToGazelibCommon(unittest.TestCase):
 
     def test_convert(self):
-
-        common = gazelibfixtures.common.convert(gazedata_path,
-                                                exp_config_path,
-                                                trial_config_id='shift')
+        c = gazelibfixtures.common.convert(trial_path, exp_config_path,
+                                           trial_config_id='shift')
         required_streams = [
             'gazelib/gaze/left_eye_x_relative',
             'gazelib/gaze/left_eye_y_relative',
@@ -33,6 +32,9 @@ class TestGazelibFixturesToGazelibCommon(unittest.TestCase):
         ]
         # Test if lists contain same elements
         for req in required_streams:
-            self.assertIn(req, common.get_stream_names())
+            self.assertIn(req, c.get_stream_names())
 
-        # common.save_as_json('foo.json')
+    def test_correct_number_of_events(self):
+        c = gazelibfixtures.common.convert(trials_path, exp_config_path,
+                                           trial_config_id='shift')
+        self.assertEqual(c.count_events('icl/experiment/reaction/trial'), 3)

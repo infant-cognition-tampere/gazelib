@@ -166,8 +166,15 @@ class TestCommonV1(unittest.TestCase):
         slicec = g.slice_by_tag('test/center', index=1)
         self.assertEqual(len(slicec.get_timeline('eyetracker')), 1)
 
-    def test_iter_by_tag(self):
+    def test_count_events(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        self.assertEqual(g.count_events(), 5)
+        self.assertEqual(g.count_events('test/center'), 2)
+        self.assertEqual(g.count_events('test/first-half'), 1)
+        self.assertEqual(g.count_events(''), 0)
 
+    def test_iter_by_tag(self):
         raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 

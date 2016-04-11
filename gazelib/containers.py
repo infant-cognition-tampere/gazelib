@@ -242,6 +242,20 @@ class CommonV1(object):
         gt = self.raw['time_reference']
         return unix_time_micros - gt
 
+    def count_events(self, tag=None):
+        '''
+        Return integer, number of stored events.
+        If the optional tag is given, count only events with the tag.
+        '''
+        if tag is None:
+            return len(self.raw['events'])
+        else:
+            total = 0
+            for ev in self.raw['events']:
+                if tag in ev['tags']:
+                    total += 1
+            return total
+
     def get_environment(self, env_name):
         '''
         Return value of the environment.
