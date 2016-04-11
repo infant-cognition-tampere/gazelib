@@ -65,6 +65,8 @@ def render_overview(common, output_html_filepath, title='Overview'):
     '''
     Create HTML-based visualization from all streams and events.
     Does not understand stream or event semantics like gaze paths for example.
+
+    Can be slow if streams contain large number of gaps.
     '''
 
     # Collect figures together
@@ -123,7 +125,10 @@ def render_overview(common, output_html_filepath, title='Overview'):
 
     evs = sorted(evs, key=order_key)
 
+    # Plot height: it is dependent on number of events.
+    # With one event, we want it still be visible, thus the constant.
     fig = plotting.figure(title='Events', y_range=(-1, len(evs)),
+                          plot_height=(100 + 50 * len(evs)),
                           plot_width=1000,
                           x_axis_label='time (ms)',
                           toolbar_location=None)
