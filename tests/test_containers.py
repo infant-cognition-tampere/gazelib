@@ -166,6 +166,18 @@ class TestCommonV1(unittest.TestCase):
         slicec = g.slice_by_tag('test/center', index=1)
         self.assertEqual(len(slicec.get_timeline('eyetracker')), 1)
 
+    def test_get_event_by_tag(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+
+        ev = g.get_event_by_tag('test/center')
+        self.assertEqual(ev['range'][0], 40000)
+
+        self.assertRaises(CommonV1.MissingTagException,
+                          lambda: g.get_event_by_tag('foo'))
+        self.assertRaises(IndexError,
+                          lambda: g.get_event_by_tag('test/center', 2))
+
     def test_count_events(self):
         raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)

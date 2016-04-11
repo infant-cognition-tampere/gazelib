@@ -26,16 +26,19 @@ class CommonV1(object):
         pass
 
     class MissingEnvironmentException(Exception):
-        '''Raised if a environment cannot be found.'''
+        '''Raised if a given environment name cannot be found.'''
         pass
 
     class MissingTimelineException(Exception):
-        '''Raised if a timeline cannot be found.'''
+        '''Raised if a given timeline name cannot be found.'''
         pass
 
     class MissingStreamException(Exception):
-        '''Raised if a stream cannot be found.'''
+        '''Raised if a given stream name cannot be found.'''
         pass
+
+    class MissingTagException(Exception):
+        '''Raised if a given event tag cannot be found'''
 
     class InvalidTimelineException(Exception):
         '''Raised if a timeline does not fit the CommonV1 specification.'''
@@ -256,6 +259,12 @@ class CommonV1(object):
                     total += 1
             return total
 
+    def get_duration(self):
+        '''
+        Difference in microseconds between the smallest and largest time point.
+        '''
+        return self.get_relative_end_time() - self.get_relative_start_time()
+
     def get_environment(self, env_name):
         '''
         Return value of the environment.
@@ -267,38 +276,38 @@ class CommonV1(object):
             msg = 'Environment ' + str_e + ' not found.'
             raise CommonV1.MissingEnvironmentException(msg)
 
-    def get_timeline(self, timeline_name):
+    def get_environment_names(self):
         '''
-        Return:
-            timeline i.e. a list of relative times.
+        DEPRECATED: Use list_environment_names instead
+        '''
+        return self.list_environment_names()
 
-        Raise:
-            CommonV1.MissingTimelineException: if name not found.
+    def get_event_by_tag(self, tag, index=0):
         '''
-        try:
-            return self.raw['timelines'][timeline_name]
-        except KeyError:
-            str_tl = str(timeline_name)
-            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
-                                                    ' not found.')
+        Return event that has the given tag. By default the first occurence
+        is returned.
 
-    def get_timeline_mean_interval(self, timeline_name):
+        Raise MissingTagException if no events are found.
+        Raise IndexError if tags found but index out of range.
         '''
-        Return mean interval in microseconds, measured over the timeline.
-        '''
-        try:
-            tl = self.raw['timelines'][timeline_name]
-            return arithmetic_mean(deltas(tl))
-        except KeyError:
-            str_tl = str(timeline_name)
-            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
-                                                    ' not found.')
 
-    def get_time_reference(self):
-        '''
-        Return the time reference as microseconds from unix epoch.
-        '''
-        return self.raw['time_reference']
+        # Select event of the index:th tag
+        tag_found = False
+        i = 0
+        for event in self.raw['events']:
+            if tag in event['tags']:
+                tag_found = True
+                if index == i:
+                    return event
+                i += 1
+
+        # Tag was found but index was too high.
+        if tag_found:
+            raise IndexError('Index ' + str(index) + ' out of range(' +
+                             str(i) + ').')
+        else:
+            raise CommonV1.MissingTagException('Events with tag ' + str(tag) +
+                                               ' not found.')
 
     def get_relative_start_time(self):
         '''
@@ -337,36 +346,6 @@ class CommonV1(object):
         tl = self.get_timeline(timeline_name)
         return tl[index]
 
-    def get_duration(self):
-        '''
-        Difference in microseconds between the smallest and largest time point.
-        '''
-        return self.get_relative_end_time() - self.get_relative_start_time()
-
-    def get_environment_names(self):
-        '''
-        DEPRECATED: Use list_environment_names instead
-        '''
-        return self.list_environment_names()
-
-    def get_stream_names(self):
-        '''
-        DEPRECATED: Use list_stream_names instead
-        '''
-        return self.list_stream_names()
-
-    def get_stream(self, stream_name):
-        '''
-        Return: CommonV1 stream dict.
-        Raise: CommonV1.MissingStreamException: if name not found.
-        '''
-        try:
-            return self.raw['streams'][stream_name]
-        except KeyError:
-            str_name = str(stream_name)
-            raise CommonV1.MissingStreamException('Stream ' + str_name +
-                                                  ' not found.')
-
     def get_stream_values(self, stream_name):
         '''
         Return: the full list of values of the stream.
@@ -380,6 +359,57 @@ class CommonV1(object):
         Raise: CommonV1.MissingStreamException: if name not found.
         '''
         return self.get_stream(stream_name)['timeline']
+
+    def get_stream(self, stream_name):
+        '''
+        Return: CommonV1 stream dict.
+        Raise: CommonV1.MissingStreamException: if name not found.
+        '''
+        try:
+            return self.raw['streams'][stream_name]
+        except KeyError:
+            str_name = str(stream_name)
+            raise CommonV1.MissingStreamException('Stream ' + str_name +
+                                                  ' not found.')
+
+    def get_stream_names(self):
+        '''
+        DEPRECATED: Use list_stream_names instead
+        '''
+        return self.list_stream_names()
+
+    def get_timeline(self, timeline_name):
+        '''
+        Return:
+            timeline i.e. a list of relative times.
+
+        Raise:
+            CommonV1.MissingTimelineException: if name not found.
+        '''
+        try:
+            return self.raw['timelines'][timeline_name]
+        except KeyError:
+            str_tl = str(timeline_name)
+            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
+                                                    ' not found.')
+
+    def get_timeline_mean_interval(self, timeline_name):
+        '''
+        Return mean interval in microseconds, measured over the timeline.
+        '''
+        try:
+            tl = self.raw['timelines'][timeline_name]
+            return arithmetic_mean(deltas(tl))
+        except KeyError:
+            str_tl = str(timeline_name)
+            raise CommonV1.MissingTimelineException('Timeline ' + str_tl +
+                                                    ' not found.')
+
+    def get_time_reference(self):
+        '''
+        Return the time reference as microseconds from unix epoch.
+        '''
+        return self.raw['time_reference']
 
     def has_environments(self, env_names):
         '''
@@ -416,16 +446,24 @@ class CommonV1(object):
         return iter(self.raw['events'])
 
     def iter_events_by_tag(self, tag):
-        '''Yield events that have the tag.'''
+        '''
+        Yield events that have the tag.
+        Raise MissingTagException if no events found.
+        '''
+        num_yields = 0
         for ev in self.iter_events():
             if tag in ev['tags']:
                 yield ev
-
-    def iter_slices_by_tag(self, tag, limit_to=None):
-        '''DEPRECATED. Use iter_by_tag instead.'''
-        return self.iter_by_tag(tag, limit_to)
+                num_yields += 1
+        if num_yields == 0:
+            raise CommonV1.MissingTagException('Events with tag ' + str(tag) +
+                                               ' not found.')
 
     def iter_by_tag(self, tag, limit_to=None):
+        '''DEPRECATED as too vague. Use iter_slices_by_tag instead.'''
+        return self.iter_slices_by_tag(tag, limit_to)
+
+    def iter_slices_by_tag(self, tag, limit_to=None):
         '''
         Slice to multiple portions. E.g. if there is ten events with "trial"
         tag, returns iterable over ten slices, one for each tag.
@@ -438,8 +476,9 @@ class CommonV1(object):
 
         Return
             iterable of CommonV1 objects
-        '''
 
+        Raise MissingTagException if no events found.
+        '''
         for index, event in enumerate(self.iter_events_by_tag(tag)):
             range_start = event['range'][0]
             range_end = event['range'][1]
@@ -658,25 +697,13 @@ class CommonV1(object):
         Return
             CommonV1 instance
                 that has data only during the tagged event.
-            None
-                if no such tag found
+
+        Raise MissingTagException if no events with given tag found.
+        Raise IndexError if tag found but index out of range.
         '''
-        # Select event of the index:th tag
-        target_event = None
-        i = 0
-        for event in self.raw['events']:
-            if tag in event['tags']:
-                if index == i:
-                    target_event = event
-                    break
-                i += 1
-
-        if target_event is None:
-            return None
-
-        range_start = target_event['range'][0]
-        range_end = target_event['range'][1]
-
+        ev = self.get_event_by_tag(tag, index)
+        range_start = ev['range'][0]
+        range_end = ev['range'][1]
         return self.slice_by_relative_time(range_start, range_end)
 
     # Mutators
