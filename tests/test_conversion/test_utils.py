@@ -7,6 +7,15 @@ except ImportError:
 from gazelib.conversion import utils as unit
 split = unit.split_to_ranges_at_change_in_value
 
+
+def value_converter(r):
+    return int(r['a'])
+
+
+def time_converter(r):
+    return r['t']
+
+
 class TestEstimateSamplingInterval(unittest.TestCase):
 
     def test_basic(self):
@@ -20,12 +29,6 @@ class TestEstimateSamplingInterval(unittest.TestCase):
 class TestSplitToRangesAtChangeInValue(unittest.TestCase):
 
     def test_value_error(self):
-
-        def value_converter(r):
-            return int(r['a'])
-
-        def time_converter(r):
-            return r['t']
 
         rows = [
             {'t': 1, 'a': ''},
@@ -49,3 +52,17 @@ class TestSplitToRangesAtChangeInValue(unittest.TestCase):
         self.assertEqual(slices[0]['end'], 3)
         self.assertEqual(slices[0]['value'], 1)
         self.assertEqual(slices[0]['first']['t'], 2)
+
+    def test_multiple_values(self):
+
+        rows = [
+            {'t': 1, 'a': None},
+            {'t': 2, 'a': '1'},
+            {'t': 3, 'a': None},
+            {'t': 4, 'a': '1'},
+            {'t': 5, 'a': None},
+            {'t': 6, 'a': '2'},
+            {'t': 7, 'a': None}
+        ]
+        slices = list(split(rows, value_converter, time_converter))
+        self.assertEqual(len(slices), 2)

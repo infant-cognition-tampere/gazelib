@@ -33,7 +33,7 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
     '''
     Similar to gazelib.legacy.igazelib.split_at_change_in_value but
     returns also starting and ending times. The start time is equal to
-    the end time of the previous range.
+    the end time of the previous range. Invalid values do not cause splits.
 
     Parameters:
         gd
@@ -41,14 +41,14 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
         value_converter
             A function that converts from raw row to the value
             used for comparison and also in yielded dicts.
-            Must raise ValueError if value cannot be converted.
-            On ValueError the row will be skipped.
+            Must raise ValueError or TypeError if value cannot be converted.
+            On ValueError or TypeError the row will be skipped.
         time_converter
             A function that converts from raw row to times used
             in ranges.
             Must return integer.
-            Must raise ValueError if time cannot be converted.
-            On ValueError the row will be skipped.
+            Must raise ValueError or TypeError if time cannot be converted.
+            On ValueError or TypeError the row will be skipped.
 
     Yields dicts:
         {
@@ -63,7 +63,6 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
     times = map(time_converter, gd)
     sample_interval = int(round(estimate_sampling_interval(times)))
 
-    num_yields = 0
     cur_time = None
     previous_value = None
     event_to_yield = None
@@ -74,8 +73,9 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
             # cur_time must be last because otherwise it would not always
             # point to the time of last valid row. If last rows are
             # invalid, the last event should still have correct time.
-        except ValueError:
-            # Skip invalid but remember the previous value
+        except (ValueError, TypeError):
+            # Skip invalid but remember the previous value.
+            # This way we do not split at invalid values.
             continue
 
         # Iterate until value differs from the previous
@@ -85,7 +85,7 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
         # Assert: different valid value observed
 
         # If first row, do not store dict but start the first dict.
-        if num_yields == 0:
+        if event_to_yield is None:
             event_to_yield = {
                 'start': cur_time,
                 'value': cur_value,
@@ -95,7 +95,6 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
             # Range dict finished
             event_to_yield['end'] = cur_time
             yield event_to_yield
-            num_yields += 1
 
             # Start new one
             event_to_yield = {
@@ -110,7 +109,6 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
     if event_to_yield is not None:
         event_to_yield['end'] = cur_time + sample_interval
         yield event_to_yield
-        num_yields += 1
 
 
 class ExperimentConfiguration(object):
