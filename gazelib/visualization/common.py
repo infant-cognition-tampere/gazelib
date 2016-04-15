@@ -127,19 +127,43 @@ def render_overview(common, output_html_filepath, title='Overview'):
 
     # Plot height: it is dependent on number of events.
     # With one event, we want it still be visible, thus the constant.
+    plot_height = (100 + 50 * len(evs))
     fig = plotting.figure(title='Events', y_range=(-1, len(evs)),
-                          plot_height=(100 + 50 * len(evs)),
                           plot_width=1000,
+                          plot_height=plot_height,
                           x_axis_label='time (ms)',
                           toolbar_location=None)
 
     # Hide event indices and draw custom text instead.
     fig.yaxis.visible = None
 
+    def get_text_position(x0, x1, minx, maxx):
+        '''Change text position based on event's horizontal position so that
+        the rightmost text do not go over the right edge.'''
+        # Event mean, normalized to range
+        c = (x0 + x1) / 2 - minx
+        # Max range
+        r = maxx - minx
+
+        if c < 2 * r / 3:
+            return (x0, 'left')
+        # Center align was not good because text formed
+        # visually annoying justification.
+        # if c < 2 * r / 3:
+        #     return ((x0 + x1) / 2, 'center')
+        return (x1, 'right')
+
+    # Limit for horizontal coordinates. Helps to position text.
+    evs_minx = to_ms(evs[-1]['range'][0])
+    evs_maxx = to_ms(evs[0]['range'][1])
+
     for i, ev in enumerate(evs):
         t0 = to_ms(ev['range'][0])
         t1 = to_ms(ev['range'][1])
-        fig.text(text=[', '.join(ev['tags'])], y=[i + 0.1], x=[t0])
+
+        x, align = get_text_position(t0, t1, evs_minx, evs_maxx)
+        fig.text(text=[', '.join(ev['tags'])], y=[i + 0.1], x=[x],
+                 text_align=align)
 
         fig.line(x=[t0, t1], y=[i, i], line_width=6, line_color='black')
         # Mark where events start and end.
