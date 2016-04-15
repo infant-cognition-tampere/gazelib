@@ -321,6 +321,10 @@ class TestCommonV1(unittest.TestCase):
         f = lambda: g.add_event(['my_tag', 'my_tag2'], 'a', 1400000)
         self.assertRaises(ieex, f)
 
+        # Invalid derived
+        f = lambda: g.add_event(['my_tag'], 0, 10, derived=True)
+        self.assertRaises(ieex, f)
+
         # Invalid range
         f = lambda: g.add_event(['my_tag'], 100, 0)
         self.assertRaises(ieex, f)

@@ -75,15 +75,29 @@ def render_overview(common, output_html_filepath, title='Overview'):
     def to_ms(micros):
         return int(round(micros / 1000))
 
+    def pick_color(d):
+        '''
+        We visually discriminate original and derived data.
+
+        Parameters:
+          d: event or stream object.
+
+        Return color string
+        '''
+        if 'derived' in d:
+            return 'blue'
+        return 'black'
+
     #########
     # Streams
     #########
 
     stream_names = sorted(common.list_stream_names())
     for stream_name in stream_names:
-        tl_name = common.get_stream_timeline_name(stream_name)
-        x = list(map(to_ms, common.get_timeline(tl_name)))
-        y = common.get_stream_values(stream_name)
+        stream = common.get_stream(stream_name)
+        x = list(map(to_ms, common.get_timeline(stream['timeline'])))
+        y = stream['values']
+        color = pick_color(stream)
 
         # Get valid substreams
         sl = utils.get_valid_sublists_2d(x, y)
@@ -93,7 +107,7 @@ def render_overview(common, output_html_filepath, title='Overview'):
                               toolbar_location=None)
 
         for xs, ys in sl:
-            fig.line(xs, ys, line_color='black')
+            fig.line(xs, ys, line_color=color)
 
         # Emphasize gaps with red line.
         # Loop pairwise, fill gaps.
@@ -161,16 +175,18 @@ def render_overview(common, output_html_filepath, title='Overview'):
         t0 = to_ms(ev['range'][0])
         t1 = to_ms(ev['range'][1])
 
+        color = pick_color(ev)
+
         x, align = get_text_position(t0, t1, evs_minx, evs_maxx)
         fig.text(text=[', '.join(ev['tags'])], y=[i + 0.1], x=[x],
-                 text_align=align)
+                 text_align=align, text_color=color)
 
-        fig.line(x=[t0, t1], y=[i, i], line_width=6, line_color='black')
+        fig.line(x=[t0, t1], y=[i, i], line_width=6, line_color=color)
         # Mark where events start and end.
         fig.line(x=[t0, t0], y=[i - 0.1, i + 0.1],
-                 line_width=2, line_color='black')
+                 line_width=2, line_color=color)
         fig.line(x=[t1, t1], y=[i - 0.1, i + 0.1],
-                 line_width=2, line_color='black')
+                 line_width=2, line_color=color)
 
     figs.append(fig)
 

@@ -2,7 +2,7 @@
 '''
 Classes that store the gaze data and can be fed to analysis functions.
 '''
-from .validation import is_list_of_strings, is_integer
+from .validation import is_list_of_strings, is_integer, is_string
 # from .settings import min_event_slice_overlap_seconds as min_overlap
 from .statistics import arithmetic_mean, deltas
 from .io import load_json, write_json, write_fancy_json, write_dictlist_as_csv
@@ -104,6 +104,9 @@ class CommonV1(object):
                             'values': {
                                 'type': 'array'
                             },
+                            'derived': {
+                                'type': 'string'
+                            },
                             'confidence': {
                                 'type': 'array',
                                 'items': {
@@ -133,6 +136,9 @@ class CommonV1(object):
                             'items': {
                                 'type': 'number'
                             }
+                        },
+                        'derived': {
+                            'type': 'string'
                         },
                         'extra': {}
                     },
@@ -722,6 +728,45 @@ class CommonV1(object):
         # TODO raise error if invalid
         self.raw['environment'][env_name] = env_value
 
+    def add_event(self, tags, start_time, end_time, derived=None, extra=None):
+        '''
+        Add new event.
+
+        Parameters:
+            tags
+                A list of tag strings.
+            start_time
+                A relative time in microseconds. The starting time of event.
+            end_time
+                A relative time in microseconds. The ending time of event.
+            derived
+                Optional name of function that was used to derive the event.
+            extra
+                An optional place for extra info. Typically a dict.
+        '''
+        if not is_list_of_strings(tags):
+            raise CommonV1.InvalidEventException('Invalid tag list')
+        if (not is_integer(start_time)) or (not is_integer(end_time)):
+            rang = '[' + str(start_time) + ', ' + str(end_time) + ']'
+            raise CommonV1.InvalidEventException('Invalid range: ' + rang)
+        if start_time > end_time:
+            rang = '[' + str(start_time) + ', ' + str(end_time) + ']'
+            msg = 'Invalid range order: ' + rang
+            raise CommonV1.InvalidEventException(msg)
+        new_event = {
+            'tags': tags,
+            'range': [start_time, end_time],
+        }
+        if derived is not None:
+            if not is_string(derived):
+                msg = 'Derived must be a string: ' + str(derived)
+                raise CommonV1.InvalidEventException(msg)
+            new_event['derived'] = derived
+        if extra is not None:
+            new_event['extra'] = extra
+
+        self.raw['events'].append(new_event)
+
     def add_stream(self, stream_name, timeline_name, values, confidence=None):
         '''
         Add a new sequence of sampled data.
@@ -797,36 +842,6 @@ class CommonV1(object):
             self.raw['timelines'][timeline_name] = list(timeline_values)
         else:
             raise CommonV1.InvalidTimelineException()
-
-    def add_event(self, tags, start_time, end_time, extra=None):
-        '''
-        Add new event.
-
-        Parameters:
-            tags
-                A list of tag strings.
-            start_time
-                A relative time in microseconds. The starting time of event.
-            end_time
-                A relative time in microseconds. The ending time of event.
-            extra
-                An optional place for extra info. Typically a dict.
-        '''
-        if not is_list_of_strings(tags):
-            raise CommonV1.InvalidEventException('Invalid tag list')
-        if (not is_integer(start_time)) or (not is_integer(end_time)):
-            rang = '[' + str(start_time) + ', ' + str(end_time) + ']'
-            raise CommonV1.InvalidEventException('Invalid range: ' + rang)
-        if start_time > end_time:
-            raise CommonV1.InvalidEventException('Invalid range order')
-        new_event = {
-            'tags': tags,
-            'range': [start_time, end_time],
-        }
-        if extra is not None:
-            new_event['extra'] = extra
-
-        self.raw['events'].append(new_event)
 
     def set_time_reference(self, microseconds_from_epoch):
         '''

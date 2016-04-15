@@ -217,7 +217,7 @@ def convert(gazedata_file_path, experiment_config_file_path,
             'icl/experiment/reaction/trial/sequence_number': r['value']
         }
         c.add_event(['icl/experiment/reaction/trial'],
-                    r['start'], r['end'], extra)
+                    r['start'], r['end'], extra=extra)
 
     ##################
     # Image stimuli i.e. UserDefined_1 & Aoi
@@ -244,6 +244,6 @@ def convert(gazedata_file_path, experiment_config_file_path,
                 trialconf.get_aoi_rectangle(aoi_index)
         }
         c.add_event(['icl/stimulus', 'icl/stimulus/image'],
-                    r['start'], r['end'], extra)
+                    r['start'], r['end'], extra=extra)
 
     return c
