@@ -17,6 +17,14 @@ class TestValidation(unittest.TestCase):
         self.assertTrue(unit.has_only_keys(d, ['a', 'b', 'c']))
         self.assertFalse(unit.has_only_keys(d, ['a', 'b']))
 
+    def test_is_string(self):
+        a = u'foo'
+        b = str('foo')
+        self.assertTrue(unit.is_string(a))
+        self.assertTrue(unit.is_string(b))
+        self.assertFalse(unit.is_string(None))
+        self.assertFalse(unit.is_string(3))
+
     def test_is_list_of_strings(self):
 
         self.assertFalse(unit.is_list_of_strings(['1',1]))
