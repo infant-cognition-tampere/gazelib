@@ -7,6 +7,14 @@ from gazelib import statistics as unit
 
 class TestStatistics(unittest.TestCase):
 
+    def test_minimum(self):
+        self.assertEqual(unit.minimum([None]), None)
+        self.assertEqual(unit.minimum([None, 1, 2, 1]), 1)
+
+    def test_maximum(self):
+        self.assertEqual(unit.maximum([None]), None)
+        self.assertEqual(unit.maximum([None, 1, 2, 1]), 2)
+
     def test_deltas(self):
 
         l = [1, 2, 3, 4, 5]
