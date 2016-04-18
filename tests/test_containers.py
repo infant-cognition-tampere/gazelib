@@ -219,6 +219,13 @@ class TestCommonV1(unittest.TestCase):
         self.assertTrue(hasattr(evs, '__iter__'))
         self.assertEqual(len(list(evs)), 2)
 
+    def test_iter_events_by_tags(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.iter_events_by_tags(['test/center', 'test/first-half'])
+        self.assertTrue(hasattr(evs, '__iter__'))
+        self.assertEqual(len(list(evs)), 3)
+
     def test_list_tags(self):
         raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)

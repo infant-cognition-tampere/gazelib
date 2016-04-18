@@ -456,14 +456,30 @@ class CommonV1(object):
         Yield events that have the tag.
         Raise MissingTagException if no events found.
         '''
+        for ev in self.iter_events_by_tags([tag]):
+            yield ev
+
+    def iter_events_by_tags(self, tags):
+        '''
+        Yield events that have at least one of the tags.
+        For example, used internally by save_events_as_csv(tags)
+
+        Parameters:
+            tags: a list of tags
+
+        Raise MissingTagException if no events found.
+        '''
         num_yields = 0
+        stags = set(tags)
         for ev in self.iter_events():
-            if tag in ev['tags']:
+            # Intersection
+            sev = set(ev['tags'])
+            if len(stags.intersection(sev)) > 0:
                 yield ev
                 num_yields += 1
         if num_yields == 0:
-            raise CommonV1.MissingTagException('Events with tag ' + str(tag) +
-                                               ' not found.')
+            msg = 'Events with tags in (' + ','.join(tags) + ') not found.'
+            raise CommonV1.MissingTagException(msg)
 
     def iter_by_tag(self, tag, limit_to=None):
         '''DEPRECATED as too vague. Use iter_slices_by_tag instead.'''
@@ -860,6 +876,22 @@ class CommonV1(object):
             raise CommonV1.InvalidTimeException('Must be integer.')
 
     # IO
+
+    def save_events_as_csv(self, tags, target_file_path, delimiter='\t'):
+        '''
+        Save CSV file with each event as row and with columns:
+            start_time: event start time in unix time
+            end_time: event end time in unix time
+            <1st tag>: 1 = event has tag, 0 = event does not have this tag
+            <2nd tag>:
+            ...
+
+        The file includes header row.
+        '''
+        # self.iter_events_by_tag()
+        # write_dictlist_as_csv(target_file_path, iterstreams(),
+        #                      headers=headers, delimiter=delimiter)
+        pass
 
     def save_timeline_as_csv(self, timeline_name, target_file_path,
                              delimiter='\t'):
