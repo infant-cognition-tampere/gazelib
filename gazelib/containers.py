@@ -888,10 +888,23 @@ class CommonV1(object):
 
         The file includes header row.
         '''
-        # self.iter_events_by_tag()
-        # write_dictlist_as_csv(target_file_path, iterstreams(),
-        #                      headers=headers, delimiter=delimiter)
-        pass
+        def iterevents():
+            for ev in self.iter_events_by_tags(tags):
+                row = {
+                    'start_time': ev['range'][0],
+                    'end_time': ev['range'][1]
+                }
+                for tag in tags:
+                    if tag in ev['tags']:
+                        row[tag] = 1
+                    else:
+                        row[tag] = 0
+                yield row
+
+        # Define order of columns
+        headers = ['start_time', 'end_time'] + tags
+        write_dictlist_as_csv(target_file_path, iterevents(),
+                              headers=headers, delimiter=delimiter)
 
     def save_timeline_as_csv(self, timeline_name, target_file_path,
                              delimiter='\t'):

@@ -355,6 +355,23 @@ class TestCommonV1(unittest.TestCase):
         # Remove saved file
         remove_temp_file(fpath)
 
+    def test_save_events_as_csv(self):
+        # Load JSON file
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
+        # Save it partially as CSV
+        fpath = get_temp_filepath('myfile.csv')
+        c.save_events_as_csv(['test/center', 'test/first-half'],
+                             fpath, delimiter=',')
+        # Test contents
+        dl = gazelib.io.load_csv_as_dictlist(fpath, delimiter=',')
+        self.assertEqual(len(dl), 3)
+        self.assertIn('start_time', dl[0])
+        self.assertIn('end_time', dl[0])
+        self.assertIn('test/center', dl[2])
+        self.assertEqual(int(dl[2]['test/center']), 0)
+        # Remove saved file
+        remove_temp_file(fpath)
+
     def test_save_as_json(self):
 
         fpath = get_temp_filepath('myfile.json')
