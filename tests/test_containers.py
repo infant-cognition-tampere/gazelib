@@ -78,6 +78,15 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(t1, 110000)
         self.assertEqual(dur, 60000)
 
+    def test_get_start_end_time_from_empty(self):
+        c = CommonV1()
+
+        f = lambda: c.get_relative_start_time()
+        self.assertRaises(CommonV1.EmptyContainerException, f)
+
+        f = lambda: c.get_relative_end_time()
+        self.assertRaises(CommonV1.EmptyContainerException, f)
+
     def test_get_relative_time_by_index(self):
         c = CommonV1(get_fixture_filepath('sample.common.json'))
 
@@ -122,7 +131,7 @@ class TestCommonV1(unittest.TestCase):
         sliceg = g.slice_by_relative_time(50000, 110000)
         assert_deep_equal(self, sliceg.raw, subg.raw)
 
-    def test_slice_by_global_time(self):
+    def test_slice_by_unix_time(self):
         raw = load_fixture('sample.common.json')
         subraw = load_fixture('subsample.common.json')
         g = gazelib.containers.CommonV1(raw)
@@ -165,6 +174,16 @@ class TestCommonV1(unittest.TestCase):
         # Reference by index
         slicec = g.slice_by_tag('test/center', index=1)
         self.assertEqual(len(slicec.get_timeline('eyetracker')), 1)
+
+    def test_slice_first_microseconds(self):
+
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        g = g.slice_by_timeline('ecg', 0)
+        gf = g.slice_first_microseconds(32000)
+        self.assertEqual(gf.get_duration(), 32000)
+        tl = gf.get_timeline('ecg')
+        self.assertEqual(len(tl), 4)
 
     def test_get_event_by_tag(self):
         raw = load_fixture('sample.common.json')

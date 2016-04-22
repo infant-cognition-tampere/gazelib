@@ -60,6 +60,14 @@ class CommonV1(object):
         '''Raised if a time is not an integer.'''
         pass
 
+    class EmptyContainerException(Exception):
+        '''
+        Raised if there is not enough content for a CommonV1 method.
+        For example get_relative_start_time cannot return anything
+        if there is no timelines or they are empty.
+        '''
+        pass
+
     # JSON Schema to validate raw input
     # For grammar,
     # see http://json-schema.org/latest/json-schema-validation.html
@@ -320,30 +328,67 @@ class CommonV1(object):
         Find he smallest time in the container as relative time.
         Can be negative.
         '''
-        # Min of first elements in timelines
-        tl_1st = [timeline[0] for timeline in self.raw['timelines'].values()]
-        tl_min = min(tl_1st)
 
-        # Min in range of events
-        ev_1st = [ev['range'][0] for ev in self.raw['events']]
-        ev_min = min(ev_1st)
+        tls = self.raw['timelines']
+        evs = self.raw['events']
 
-        return min(tl_min, ev_min)
+        has_timelines = len(tls.keys()) > 0
+        has_events = len(evs) > 0
+        # Timelines cannot be empty
+
+        if has_timelines:
+            # Min of first elements in timelines
+            tl_1st = [tl[0] for tl in tls.values()]
+            tl_min = min(tl_1st)
+
+        if has_events:
+            # Min in range of events
+            ev_1st = [ev['range'][0] for ev in evs]
+            ev_min = min(ev_1st)
+
+        if has_timelines:
+            if has_events:
+                return min(tl_min, ev_min)
+            else:
+                return tl_min
+        else:
+            if has_events:
+                return ev_min
+            else:
+                raise CommonV1.EmptyContainerException('No time content.')
 
     def get_relative_end_time(self):
         '''
         Find the largest time in the container as relative time.
         Can be negative.
         '''
-        # Max of last elements in timelines
-        tl_last = [timeline[-1] for timeline in self.raw['timelines'].values()]
-        tl_max = max(tl_last)
 
-        # Max in range of events
-        ev_last = [ev['range'][1] for ev in self.raw['events']]
-        ev_max = max(ev_last)
+        tls = self.raw['timelines']
+        evs = self.raw['events']
 
-        return max(tl_max, ev_max)
+        has_timelines = len(tls.keys()) > 0
+        has_events = len(evs) > 0
+
+        if has_timelines:
+            # Max of last elements in timelines
+            tl_last = [tl[-1] for tl in tls.values()]
+            tl_max = max(tl_last)
+
+        if has_events:
+            # Max in range of events
+            ev_last = [ev['range'][1] for ev in evs]
+            ev_max = max(ev_last)
+
+        if has_timelines:
+            if has_events:
+                return max(tl_max, ev_max)
+            else:
+                return tl_max
+        else:
+            if has_events:
+                return ev_max
+            else:
+                raise CommonV1.EmptyContainerException('No time content.')
 
     def get_relative_time_by_index(self, timeline_name, index):
         '''
@@ -538,6 +583,7 @@ class CommonV1(object):
         Return new CommonV1 object with data only in the time range.
         Will slice events that are partially outside.
         Will remove empty streams and events that are completely outside.
+        Will remove empty timelines
         Does not update time_reference because easier implementation
         and more efficient execution.
         '''
@@ -712,11 +758,11 @@ class CommonV1(object):
 
     def slice_by_tag(self, tag, index=0):
         '''
-        Parameters
+        Parameters:
             tag
             index
 
-        Return
+        Return:
             CommonV1 instance
                 that has data only during the tagged event.
 
@@ -726,6 +772,20 @@ class CommonV1(object):
         ev = self.get_event_by_tag(tag, index)
         range_start = ev['range'][0]
         range_end = ev['range'][1]
+        return self.slice_by_relative_time(range_start, range_end)
+
+    def slice_first_microseconds(self, n):
+        '''
+        Parameters:
+            n: <integer> microseconds
+
+        Return:
+            CommonV1 instance
+                that has data only from the first n microseconds, counted
+                from the beginning of the slice.
+        '''
+        range_start = self.get_relative_start_time()
+        range_end = range_start + n
         return self.slice_by_relative_time(range_start, range_end)
 
     # Mutators
