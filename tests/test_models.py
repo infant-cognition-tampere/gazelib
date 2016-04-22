@@ -28,7 +28,7 @@ class TestSaccade(unittest.TestCase):
     #     c2 = c1.slice_by_tag('icl/experiment/reaction/period/target')
     #     t0 = c2.get_relative_start_time()
     #     # First second
-    #     c3 = c2.slice_by_relative_time(t0, t0 + 1.0)
+    #     c3 = c2.slice_by_relative_time(t0, t0 + 1000000)
     #     r = unit.saccade.fit(c3)
     #     assert_deep_equal(self, r, {
     #         'type': 'gazelib/gaze/saccade',

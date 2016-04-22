@@ -11,3 +11,4 @@ from gazelib import legacy  # noqa
 # import gazelib.settings  # noqa
 from gazelib import statistics  # noqa
 # import gazelib.validation  # noqa
+# from . import conversion  # Must be imported separately

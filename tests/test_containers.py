@@ -11,6 +11,7 @@ from .utils import (get_temp_filepath, remove_temp_file, frange,
     get_fixture_filepath, load_fixture, assert_files_equal,
     assert_deep_equal)
 import jsonschema  # import ValidationError
+import six  # Python version agnostic string type testing.
 import os
 
 
@@ -165,8 +166,27 @@ class TestCommonV1(unittest.TestCase):
         slicec = g.slice_by_tag('test/center', index=1)
         self.assertEqual(len(slicec.get_timeline('eyetracker')), 1)
 
-    def test_iter_by_tag(self):
+    def test_get_event_by_tag(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
 
+        ev = g.get_event_by_tag('test/center')
+        self.assertEqual(ev['range'][0], 40000)
+
+        self.assertRaises(CommonV1.MissingTagException,
+                          lambda: g.get_event_by_tag('foo'))
+        self.assertRaises(IndexError,
+                          lambda: g.get_event_by_tag('test/center', 2))
+
+    def test_count_events(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        self.assertEqual(g.count_events(), 5)
+        self.assertEqual(g.count_events('test/center'), 2)
+        self.assertEqual(g.count_events('test/first-half'), 1)
+        self.assertEqual(g.count_events(''), 0)
+
+    def test_iter_by_tag(self):
         raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 
@@ -176,6 +196,42 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(slices[0].raw['events']), 5)
         self.assertEqual(len(slices[1].raw['events']), 4)  # no first-half
         self.assertEqual(len(slices[1].raw['timelines']['eyetracker']), 1)
+
+    def test_iter_events(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.iter_events()
+        self.assertTrue(hasattr(evs, '__iter__'))
+        evsl = list(evs)
+        self.assertEqual(len(evsl), 5)
+
+    def test_list_events(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.list_events()
+        self.assertIsInstance(evs, list)
+        self.assertEqual(len(evs), 5)
+
+    def test_iter_events_by_tag(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.iter_events_by_tag('test/center')
+        self.assertTrue(hasattr(evs, '__iter__'))
+        self.assertEqual(len(list(evs)), 2)
+
+    def test_iter_events_by_tags(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        evs = g.iter_events_by_tags(['test/center', 'test/first-half'])
+        self.assertTrue(hasattr(evs, '__iter__'))
+        self.assertEqual(len(list(evs)), 3)
+
+    def test_list_tags(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        tags = g.list_tags()
+        self.assertEqual(len(tags), 4)
+        self.assertIsInstance(tags[0], six.string_types)
 
     def test_set_time_reference(self):
         c = CommonV1()
@@ -266,10 +322,18 @@ class TestCommonV1(unittest.TestCase):
         f = lambda: g.add_event('my_tag', 0, 1400000)
         self.assertRaises(ieex, f)
 
-        f = lambda: g.add_event('my_tag', 0, 1400000.123)
+        f = lambda: g.add_event(['my_tag'], 0, 1400000.123)
         self.assertRaises(ieex, f)
 
         f = lambda: g.add_event(['my_tag', 'my_tag2'], 'a', 1400000)
+        self.assertRaises(ieex, f)
+
+        # Invalid derived
+        f = lambda: g.add_event(['my_tag'], 0, 10, derived=True)
+        self.assertRaises(ieex, f)
+
+        # Invalid range
+        f = lambda: g.add_event(['my_tag'], 100, 0)
         self.assertRaises(ieex, f)
 
         g.add_event(['my_tag', 'my_tag2'], 0, 1400000)
@@ -288,6 +352,23 @@ class TestCommonV1(unittest.TestCase):
         # Test equivalency
         assert_files_equal(self, fpath,
                            get_fixture_filepath('sample_eyetracker.csv'))
+        # Remove saved file
+        remove_temp_file(fpath)
+
+    def test_save_events_as_csv(self):
+        # Load JSON file
+        c = CommonV1(get_fixture_filepath('sample.common.json'))
+        # Save it partially as CSV
+        fpath = get_temp_filepath('myfile.csv')
+        c.save_events_as_csv(['test/center', 'test/first-half'],
+                             fpath, delimiter=',')
+        # Test contents
+        dl = gazelib.io.load_csv_as_dictlist(fpath, delimiter=',')
+        self.assertEqual(len(dl), 3)
+        self.assertIn('start_time', dl[0])
+        self.assertIn('end_time', dl[0])
+        self.assertIn('test/center', dl[2])
+        self.assertEqual(int(dl[2]['test/center']), 0)
         # Remove saved file
         remove_temp_file(fpath)
 

@@ -1,0 +1,546 @@
+[
+	{
+		"mediafolder": "calibration_stimuli",
+		"name": "calibration_movie",
+		"movies": ["calibmovie.avi"],
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.3, 0.0, 0.3]
+		],
+		"options": ["draweyes", "autocontinue"],
+		"trialcount": 1,
+		"trial": [
+			{
+				"duration": 500000,
+				"tag":"Sesame_street",
+				"aoitag":0,
+				"stimtag": 0,
+				"stimuli":[{"type":"movie", "id":0, "aoi": 0}]
+			}
+		]
+	},
+
+	{
+		"name": "calibration",
+		"mediafolder": "calibration_stimuli",
+		"images": ["back_small.png", "c1.png", "c2.png", "c3.png", "c4.png", "c5.png"],
+		"sounds": ["s1.wav","s2.wav","s3.wav","s4.wav","s5.wav"],
+		"movies": ["CalibStart.avi","CalibEnd.avi"],
+		"trialcount": 5,
+		"orders": {
+			"calibaois":[1, 2, 3, 4, 5],
+			"gcaois":[7, 8, 9, 10, 11],
+			"calibimages":[1, 2, 3, 4, 5],
+			"calibsounds":[0, 1, 2, 3, 4]
+		},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.05, 0.15, 0.05, 0.15],
+			[0.85, 0.95, 0.05, 0.15],
+			[0.45,0.55, 0.45,0.55],
+			[0.05, 0.15, 0.85, 0.95],
+			[0.85, 0.95,0.85, 0.95],
+			[0.0, 1.0, 0.0, 1.0],
+			[0.01, 0.19, 0.01, 0.19],
+			[0.81, 0.99, 0.01, 0.19],
+			[0.41,0.59, 0.41,0.59],
+			[0.01, 0.19, 0.81, 0.99],
+			[0.81, 0.99,0.81, 0.99]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"#permutations": [["calibsounds", "calibaois"], ["calibimages"]],
+		"options": ["calibration", "save_gazedata"],
+		"trial": [
+			{
+				"#duration":2000,
+				"duration":"gc@gcaois",
+				"tag":"Calibdot",
+				"stimtag":0,
+				"aoitag":"calibaois",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi": "calibaois"}
+				]
+			},
+			{
+				"duration":1000,
+				"#duration":"gc@calibaois",
+				"tag":"Calibdot",
+				"stimtag":0,
+				"aoitag":"calibaois",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi": "calibaois"}
+				]
+			}
+		]
+	},
+
+	{
+		"name": "SRT1",
+		"mediafolder": "Pics",
+		"images": ["back_small.png", "Fixation1.png", "Face9n.png", "Face9h.png", "Face9h.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 12,
+		"orders": {
+			"targetaoi":[3, 4, 5, 6, 3, 4, 5, 6, 3, 4, 5, 6],
+			"targetface":[2, 3, 4, 2, 4, 4, 2, 4, 3, 2, 3, 3]
+	},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.47, 0.53, 0.45, 0.55],
+			[0.40, 0.60, 0.40, 0.60],
+			[0.00, 0.30, 0.00, 0.50],
+			[0.00, 0.30, 0.50, 1.00],
+			[0.70, 1.00, 0.00, 0.50],
+			[0.70, 1.00, 0.50, 1.00]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"permutations": [["targetaoi", "targetface"]],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":750,
+				"#duration":"gc@1",
+				"tag":"Wait",
+				"stimtag":0,
+				"aoitag":0,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}
+				]
+			},
+			{
+				"#duration":2000,
+				"duration":"gc@2",
+				"tag":"AG",
+				"stimtag":0,
+				"aoitag":"0",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi":1}
+				]
+			},
+			{
+				"duration":500,
+				"#duration":"gc@1",
+				"tag":"FP",
+				"stimtag":0,
+				"aoitag":1,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi":1}
+				]
+			},
+			{
+				"#duration":500,
+				"duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":1,
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":1, "aoi": "targetaoi"}
+				]
+			},
+			{
+				"duration":2000,
+				"#duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":"targetface",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"sound", "id":0}, {"type":"image", "id":"targetface", "aoi": "targetaoi"}
+				]
+			}
+		]
+	},
+
+	{
+		"mediafolder": "Pics",
+		"name": "Break",
+		"movies": ["Video3.avi"],
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.3, 0.0, 0.3]
+		],
+		"options": [],
+		"trialcount": 1,
+		"trial": [
+			{
+				"duration": 14500,
+				"tag":"Break",
+				"aoitag":0,
+				"stimtag": 0,
+				"stimuli":[{"type":"movie", "id":0, "aoi": 0}]
+			}
+		]
+	},
+
+	{
+		"name": "SRT2",
+		"mediafolder": "Pics",
+		"images": ["back_small.png", "Fixation1.png", "Face5n.png", "Face5h.png", "Face5s.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 12,
+		"orders": {
+			"targetaoi":[3, 4, 5, 6, 3, 4, 5, 6, 3, 4, 5, 6],
+			"targetface":[2, 3, 4, 2, 4, 4, 2, 4, 3, 2, 3, 3]
+	},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.47, 0.53, 0.45, 0.55],
+			[0.40, 0.60, 0.40, 0.60],
+			[0.00, 0.30, 0.00, 0.50],
+			[0.00, 0.30, 0.50, 1.00],
+			[0.70, 1.00, 0.00, 0.50],
+			[0.70, 1.00, 0.50, 1.00]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"permutations": [["targetaoi", "targetface"]],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":750,
+				"#duration":"gc@1",
+				"tag":"Wait",
+				"stimtag":0,
+				"aoitag":0,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}
+				]
+			},
+			{
+				"#duration":2000,
+				"duration":"gc@2",
+				"tag":"AG",
+				"stimtag":0,
+				"aoitag":"0",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi":1}
+				]
+			},
+			{
+				"duration":500,
+				"#duration":"gc@1",
+				"tag":"FP",
+				"stimtag":0,
+				"aoitag":1,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi":1}
+				]
+			},
+			{
+				"#duration":500,
+				"duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":1,
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":1, "aoi": "targetaoi"}
+				]
+			},
+			{
+				"duration":2000,
+				"#duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":"targetface",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"sound", "id":0}, {"type":"image", "id":"targetface", "aoi": "targetaoi"}
+				]
+			}
+		]
+	},
+
+	{
+		"mediafolder": "Pics",
+		"name": "Break",
+		"movies": ["Video2.avi"],
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.3, 0.0, 0.3]
+		],
+		"options": [],
+		"trialcount": 1,
+		"trial": [
+			{
+				"duration": 19000,
+				"tag":"Break",
+				"aoitag":0,
+				"stimtag": 0,
+				"stimuli":[{"type":"movie", "id":0, "aoi": 0}]
+			}
+		]
+	},
+
+	{
+		"name": "SRT3",
+		"mediafolder": "Pics",
+		"images": ["back_small.png", "Fixation1.png", "Face8n.png", "Face8h.png", "Face8h.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 12,
+		"orders": {
+			"targetaoi":[3, 4, 5, 6, 3, 4, 5, 6, 3, 4, 5, 6],
+			"targetface":[2, 3, 4, 2, 4, 4, 2, 4, 3, 2, 3, 3]
+	},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.47, 0.53, 0.45, 0.55],
+			[0.40, 0.60, 0.40, 0.60],
+			[0.00, 0.30, 0.00, 0.50],
+			[0.00, 0.30, 0.50, 1.00],
+			[0.70, 1.00, 0.00, 0.50],
+			[0.70, 1.00, 0.50, 1.00]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"permutations": [["targetaoi", "targetface"]],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":750,
+				"#duration":"gc@1",
+				"tag":"Wait",
+				"stimtag":0,
+				"aoitag":0,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}
+				]
+			},
+			{
+				"#duration":2000,
+				"duration":"gc@2",
+				"tag":"AG",
+				"stimtag":0,
+				"aoitag":"1",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi":1}
+				]
+			},
+			{
+				"duration":500,
+				"#duration":"gc@1",
+				"tag":"FP",
+				"stimtag":1,
+				"aoitag":1,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi":1}
+				]
+			},
+			{
+				"#duration":500,
+				"duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":1,
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":1, "aoi": "targetaoi"}
+				]
+			},
+			{
+				"duration":2000,
+				"#duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":"targetface",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"sound", "id":0}, {"type":"image", "id":"targetface", "aoi": "targetaoi"}
+				]
+			}
+		]
+	},
+
+	{
+		"mediafolder": "Pics",
+		"name": "Break",
+		"movies": ["Video1.avi"],
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.3, 0.0, 0.3]
+		],
+		"options": [],
+		"trialcount": 1,
+		"trial": [
+			{
+				"duration": 22000,
+				"tag":"Break",
+				"aoitag":0,
+				"stimtag": 0,
+				"stimuli":[{"type":"movie", "id":0, "aoi": 0}]
+			}
+		]
+	},
+
+	{
+		"name": "SRT4",
+		"mediafolder": "Pics",
+		"images": ["back_small.png", "Fixation1.png", "Face1n.png", "Face1h.png", "Face1h.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 12,
+		"orders": {
+			"targetaoi":[3, 4, 5, 6, 3, 4, 5, 6, 3, 4, 5, 6],
+			"targetface":[2, 3, 4, 2, 4, 4, 2, 4, 3, 2, 3, 3]
+	},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.47, 0.53, 0.45, 0.55],
+			[0.40, 0.60, 0.40, 0.60],
+			[0.00, 0.30, 0.00, 0.50],
+			[0.00, 0.30, 0.50, 1.00],
+			[0.70, 1.00, 0.00, 0.50],
+			[0.70, 1.00, 0.50, 1.00]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"permutations": [["targetaoi", "targetface"]],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":750,
+				"#duration":"gc@1",
+				"tag":"Wait",
+				"stimtag":0,
+				"aoitag":0,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}
+				]
+			},
+			{
+				"#duration":2000,
+				"duration":"gc@2",
+				"tag":"AG",
+				"stimtag":0,
+				"aoitag":"0",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi":1}
+				]
+			},
+			{
+				"duration":500,
+				"#duration":"gc@1",
+				"tag":"FP",
+				"stimtag":0,
+				"aoitag":1,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi":1}
+				]
+			},
+			{
+				"#duration":500,
+				"duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":1,
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":1, "aoi": "targetaoi"}
+				]
+			},
+			{
+				"duration":2000,
+				"#duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":"targetface",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"sound", "id":0}, {"type":"image", "id":"targetface", "aoi": "targetaoi"}
+				]
+			}
+		]
+	},
+
+	{
+		"mediafolder": "Pics",
+		"name": "Break",
+		"movies": ["Video3.avi"],
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.3, 0.0, 0.3]
+		],
+		"options": [],
+		"trialcount": 1,
+		"trial": [
+			{
+				"duration": 14500,
+				"tag":"Break",
+				"aoitag":0,
+				"stimtag": 0,
+				"stimuli":[{"type":"movie", "id":0, "aoi": 0}]
+			}
+		]
+	},
+
+	{
+		"name": "SRT5",
+		"mediafolder": "Pics",
+		"images": ["back_small.png", "Fixation1.png", "Face6n.png", "Face6h.png", "Face6s.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 12,
+		"orders": {
+			"targetaoi":[3, 4, 5, 6, 3, 4, 5, 6, 3, 4, 5, 6],
+			"targetface":[2, 3, 4, 2, 4, 4, 2, 4, 3, 2, 3, 3]
+	},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.47, 0.53, 0.45, 0.55],
+			[0.40, 0.60, 0.40, 0.60],
+			[0.00, 0.30, 0.00, 0.50],
+			[0.00, 0.30, 0.50, 1.00],
+			[0.70, 1.00, 0.00, 0.50],
+			[0.70, 1.00, 0.50, 1.00]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"permutations": [["targetaoi", "targetface"]],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":750,
+				"#duration":"gc@1",
+				"tag":"Wait",
+				"stimtag":0,
+				"aoitag":0,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}
+				]
+			},
+			{
+				"#duration":2000,
+				"duration":"gc@2",
+				"tag":"AG",
+				"stimtag":0,
+				"aoitag":"0",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi":1}
+				]
+			},
+			{
+				"duration":500,
+				"#duration":"gc@1",
+				"tag":"FP",
+				"stimtag":0,
+				"aoitag":1,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi":1}
+				]
+			},
+			{
+				"#duration":500,
+				"duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":1,
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":1, "aoi": "targetaoi"}
+				]
+			},
+			{
+				"duration":2000,
+				"#duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":"targetface",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"sound", "id":0}, {"type":"image", "id":"targetface", "aoi": "targetaoi"}
+				]
+			}
+		]
+	}
+
+]

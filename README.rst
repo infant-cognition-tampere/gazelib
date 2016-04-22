@@ -29,22 +29,19 @@ With `pip
 
     $ pip install gazelib
 
+Development version::
+
+    $ pip install git+https://github.com/infant-cognition-tampere/gazelib.git@develop
 
 
 Docs
 ======
 
-Examples and API docs are available at `http://gazelib.readthedocs.org/
-<http://gazelib.readthedocs.org/>`_.
-
-
-
-For developers
-=================
-
-Tips, conventions, and specifications for the developers are available at `wiki
+Tutorials, examples, specifications, and conventions are available at `wiki
 <https://github.com/infant-cognition-tampere/gazelib/wiki>`_.
 
+API docs are available at `http://gazelib.readthedocs.org/
+<http://gazelib.readthedocs.org/>`_.
 
 
 Versioning

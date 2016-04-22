@@ -4,6 +4,32 @@ Common statistical tools that do not depend on CommonV1.
 '''
 
 
+def maximum(l):
+    '''Maximum of a list. Allows None values. Return None if no valid value.'''
+    m = None
+    for item in l:
+        if item is not None:
+            if m is not None:
+                if item > m:
+                    m = item
+            else:
+                m = item
+    return m
+
+
+def minimum(l):
+    '''Minimum of a list. Allows None values. Return None if no valid value.'''
+    m = None
+    for item in l:
+        if item is not None:
+            if m is not None:
+                if item < m:
+                    m = item
+            else:
+                m = item
+    return m
+
+
 def arithmetic_mean(l):
     '''Return arithmetic mean of list. Return None if empty list.
     Allows None values and does not take them into consideration.'''

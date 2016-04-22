@@ -2,7 +2,7 @@
 '''
 Find a linear saccade from the data.
 '''
-from gazelib.statistics import arithmetic_mean
+from gazelib.statistics import arithmetic_mean, maximum, minimum
 from gazelib.containers import CommonV1
 import saccademodel
 
@@ -24,9 +24,9 @@ def fit(g):
     Return:
         {
             'type': 'gazelib/gaze/saccade',
-            'start_time_relative':
-            'end_time_relative':
-            'mean_squared_error':
+            'start_time_relative': <int microseconds>
+            'end_time_relative': <int microseconds>
+            'mean_squared_error': <float>
         }
     '''
     g.assert_has_streams([
@@ -68,8 +68,10 @@ def fit(g):
                                         llensource + llensaccade - 1)
     rend = g.get_relative_time_by_index(r_tl_name,
                                         rlensource + rlensaccade - 1)
-    mean_start = arithmetic_mean([lstart, rstart])
-    mean_end = arithmetic_mean([lend, rend])
+    # mean_start = arithmetic_mean([lstart, rstart])
+    # mean_end = arithmetic_mean([lend, rend])
+    mean_start = minimum([lstart, rstart])
+    mean_end = maximum([lend, rend, mean_start])  # TODO hacky
 
     # MSE
     lmse = lresults['mean_squared_error']
@@ -78,7 +80,7 @@ def fit(g):
 
     return {
         'type': 'gazelib/gaze/saccade',
-        'start_time_relative': mean_start,
-        'end_time_relative': mean_end,
+        'start_time_relative': int(mean_start),  # microseconds
+        'end_time_relative': int(mean_end),
         'mean_squared_error': mean_mse
     }

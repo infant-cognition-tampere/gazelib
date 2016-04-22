@@ -1,0 +1,148 @@
+[
+	{
+		"mediafolder": "childcogn_media",
+		"name": "calibration_movie",
+		"movies": ["calibmovie.avi"],
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.0, 0.3, 0.0, 0.3]
+		],
+		"options": ["draweyes", "autocontinue"],
+		"trialcount": 1,
+		"trial": [
+			{
+				"duration": 500000,
+				"tag":"Sesame_street",
+				"aoitag":0,
+				"stimtag": 0,
+				"stimuli":[{"type":"movie", "id":0, "aoi": 0}]
+			}
+		]
+	},
+
+	{
+		"name": "calibration",
+		"experiment_group": "calibration",
+		"mediafolder": "childcogn_media",
+		"images": ["back_small.png", "back_small.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["CalibStart.avi","CalibEnd.avi"],
+		"trialcount": 5,
+		"orders": {
+			"calibaois":[1, 2, 3, 4, 5],
+			"gcaois":[6, 7, 8, 9, 10]
+		},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.05, 0.15, 0.05, 0.15],
+			[0.85, 0.95, 0.05, 0.15],
+			[0.45,0.55, 0.45,0.55],
+			[0.05, 0.15, 0.85, 0.95],
+			[0.85, 0.95,0.85, 0.95],
+			[0.01, 0.19, 0.01, 0.19],
+			[0.81, 0.99, 0.01, 0.19],
+			[0.41,0.59, 0.41,0.59],
+			[0.01, 0.19, 0.81, 0.99],
+			[0.81, 0.99,0.81, 0.99]
+		],
+		"points": [[0.1,0.1], [0.9,0.1], [0.5,0.5], [0.1,0.9], [0.9,0.9]],
+		"#permutations": [["calibaois"]],
+		"options": ["calibration", "save_gazedata"],
+		"trial": [
+			{
+				"#duration":2000,
+				"gc_aois":"gcaois",
+				"tag":"Calibdot",
+				"stimtag":0,
+				"aoitag":"calibaois",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":0, "aoi": "calibaois"}
+				]
+			},
+			{
+				"duration":1000,
+				"#gc_aois":"calibaois",
+				"tag":"Calibdot",
+				"stimtag":0,
+				"aoitag":"calibaois",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"movie", "id":1, "aoi": "calibaois"}
+				]
+			}
+		]
+	},
+	{
+		"name": "mid",
+		"experiment_group": "timetest",
+		"mediafolder": "childcogn_media",
+		"images": ["Black.png", "joku_eye.png"],
+		"sounds": ["blip.wav", "SOUND528.WAV", "complete.wav"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 1,
+		"orders": {},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.48, 0.52, 0.47, 0.53]
+		],
+		"permutations": [],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":10000,
+				"#gc_aois":"3",
+				"tag":"midbox",
+				"stimtag":"1",
+				"aoitag":1,
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":"1", "aoi":1}
+				]
+			}
+		]
+	},
+
+
+	{
+		"name": "shift",
+		"experiment_group": "timetest",
+		"mediafolder": "childcogn_media",
+		"images": ["Black.png", "joku_eye.png"],
+		"sounds": ["happyalert.WAV"],
+		"movies": ["AGStart2.avi","AGEnd.avi"],
+		"trialcount": 12,
+		"orders": {"t1":[1,2,3,4],
+				   "targetaoi":"t1+t1+t1"},
+		"aois" : [
+			[0.0, 1.0, 0.0, 1.0],
+			[0.88, 0.92, 0.87, 0.93],
+			[0.08, 0.12, 0.87, 0.93],
+			[0.08, 0.12, 0.07, 0.13],
+			[0.88, 0.92, 0.07, 0.13],
+			[0.48, 0.52, 0.47, 0.53]
+		],
+		"permutations": [],
+		"options": ["save_gazedata"],
+		"trial": [
+			{
+				"duration":2000,
+				"#gc_aois":"1",
+				"tag":"Wait",
+				"stimtag":"1",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"image", "id":"1", "aoi": "5"}
+				]
+			},
+
+			{
+				"duration":4000,
+				"#duration":"gc@targetaoi",
+				"tag":"Target",
+				"stimtag":"1",
+				"aoitag":"targetaoi",
+				"stimuli":[
+					{"type":"image", "id":0, "aoi":0}, {"type":"sound", "id":0}, {"type":"image", "id":"1", "aoi": "targetaoi"}
+				]
+			}
+		]
+	}
+]
