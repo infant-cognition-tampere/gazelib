@@ -10,10 +10,13 @@ import yaml
 # The following setup is needed for custom HTML with bokeh.
 # See http://bokeh.pydata.org/en/0.10.0/docs/user_guide/embed.html
 # See http://bokeh.pydata.org/en/latest/docs/reference/embed.html
+# For FileSystemLoader, see https://gist.github.com/wrunk/1317933
 from bokeh.resources import CDN
 from bokeh.embed import file_html
-from jinja2 import Environment, PackageLoader
-jinja2loader = PackageLoader('gazelib.visualization', 'templates')
+from jinja2 import Environment, FileSystemLoader
+import os
+this_dir = os.path.dirname(os.path.abspath(__file__))
+jinja2loader = FileSystemLoader(os.path.join(this_dir, 'templates'))
 jinja2env = Environment(loader=jinja2loader)
 overview_template = jinja2env.get_template('overview.html')
 
