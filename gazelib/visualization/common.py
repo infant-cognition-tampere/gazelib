@@ -15,10 +15,6 @@ from bokeh.resources import CDN
 from bokeh.embed import file_html
 from jinja2 import Environment, FileSystemLoader
 import os
-this_dir = os.path.dirname(os.path.abspath(__file__))
-jinja2loader = FileSystemLoader(os.path.join(this_dir, 'templates'))
-jinja2env = Environment(loader=jinja2loader)
-overview_template = jinja2env.get_template('overview.html')
 
 
 def render_path(common, output_html_filepath, title='Path'):
@@ -233,6 +229,11 @@ def render_overview(common, output_html_filepath, title='Overview',
     figs.append(fig)
 
     # Render HTML
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    jinja2loader = FileSystemLoader(os.path.join(this_dir, 'templates'))
+    jinja2env = Environment(loader=jinja2loader)
+    overview_template = jinja2env.get_template('overview.html')
+
     html = file_html(figs, CDN, title=title,
                      template=overview_template,
                      template_variables={'environment': env_html})
