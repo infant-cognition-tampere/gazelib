@@ -42,7 +42,7 @@ def convert(gazedata_file_path, experiment_config_file_path,
     c.add_environment('icl/gaze/trial_configuration_id', trial_config_id)
 
     source_files = [gazedata_file_path, experiment_config_file_path]
-    source_files = map(path.basename, source_files)
+    source_files = list(map(path.basename, source_files))
     c.add_environment('gazelib/general/source_files', source_files)
 
     assert isinstance(was_calibrated, bool)
