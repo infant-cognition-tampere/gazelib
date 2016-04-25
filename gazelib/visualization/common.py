@@ -3,6 +3,20 @@ import bokeh.plotting as plotting
 from . import utils
 import gazelib.preprocessing as gpre
 
+# For printing environments
+import yaml
+
+# Custom HTML templates are required by custom HTML such as tables.
+# The following setup is needed for custom HTML with bokeh.
+# See http://bokeh.pydata.org/en/0.10.0/docs/user_guide/embed.html
+# See http://bokeh.pydata.org/en/latest/docs/reference/embed.html
+from bokeh.resources import CDN
+from bokeh.embed import file_html
+from jinja2 import Environment, PackageLoader
+jinja2loader = PackageLoader('gazelib.visualization', 'templates')
+jinja2env = Environment(loader=jinja2loader)
+overview_template = jinja2env.get_template('overview.html')
+
 
 def render_path(common, output_html_filepath, title='Path'):
     '''
@@ -95,6 +109,16 @@ def render_overview(common, output_html_filepath, title='Overview',
         if 'derived' in d:
             return 'blue'
         return 'black'
+
+    #########
+    # Environment constants
+    #########
+
+    # Build dict
+    env_names = common.list_environment_names()
+    envs = {name: common.get_environment(name) for name in env_names}
+    # Make human readable
+    env_html = '<pre>' + yaml.dump(envs, default_flow_style=False) + '</pre>'
 
     #########
     # Streams
@@ -205,8 +229,10 @@ def render_overview(common, output_html_filepath, title='Overview',
 
     figs.append(fig)
 
-    # Lay out multiple figures
-    p = plotting.vplot(*figs)
-    # Save
-    plotting.output_file(output_html_filepath, title)
-    plotting.save(p)
+    # Render HTML
+    html = file_html(figs, CDN, title=title,
+                     template=overview_template,
+                     template_variables={'environment': env_html})
+    # Save as html file.
+    with open(output_html_filepath, 'w') as f:
+        f.write(html)
