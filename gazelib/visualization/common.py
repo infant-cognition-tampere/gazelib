@@ -118,7 +118,10 @@ def render_overview(common, output_html_filepath, title='Overview',
     env_names = common.list_environment_names()
     envs = {name: common.get_environment(name) for name in env_names}
     # Make human readable
-    env_html = '<pre>' + yaml.dump(envs, default_flow_style=False) + '</pre>'
+    # yaml.safe_dump instad of yaml.dump to avoid annoying unicode tags
+    # See http://stackoverflow.com/a/1950399/638546
+    env_yaml = yaml.safe_dump(envs, default_flow_style=False)
+    env_html = '<pre>' + env_yaml + '</pre>'
 
     #########
     # Streams
@@ -231,7 +234,7 @@ def render_overview(common, output_html_filepath, title='Overview',
 
     # Make human readable
     evs_rev = list(reversed(evs))
-    evs_yaml = yaml.dump(evs_rev, default_flow_style=False)
+    evs_yaml = yaml.safe_dump(evs_rev, default_flow_style=False)
     evs_html = '<pre>' + evs_yaml + '</pre>'
 
     ###########
