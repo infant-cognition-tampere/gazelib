@@ -228,7 +228,15 @@ def render_overview(common, output_html_filepath, title='Overview',
 
     figs.append(fig)
 
+    # Make human readable
+    evs_rev = list(reversed(evs))
+    evs_yaml = yaml.dump(evs_rev, default_flow_style=False)
+    evs_html = '<pre>' + evs_yaml + '</pre>'
+
+    ###########
     # Render HTML
+    ##########
+
     this_dir = os.path.dirname(os.path.abspath(__file__))
     jinja2loader = FileSystemLoader(os.path.join(this_dir, 'templates'))
     jinja2env = Environment(loader=jinja2loader)
@@ -236,7 +244,8 @@ def render_overview(common, output_html_filepath, title='Overview',
 
     html = file_html(figs, CDN, title=title,
                      template=overview_template,
-                     template_variables={'environment': env_html})
+                     template_variables={'environment': env_html,
+                                         'events': evs_html})
     # Save as html file.
     with open(output_html_filepath, 'w') as f:
         f.write(html)
