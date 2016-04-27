@@ -238,9 +238,14 @@ def render_overview(common, output_html_filepath, title='Overview',
     ##########
 
     this_dir = os.path.dirname(os.path.abspath(__file__))
-    jinja2loader = FileSystemLoader(os.path.join(this_dir, 'templates'))
+    template_dir = os.path.join(this_dir, 'templates')
+    jinja2loader = FileSystemLoader(template_dir)
     jinja2env = Environment(loader=jinja2loader)
-    overview_template = jinja2env.get_template('overview.html')
+    try:
+        overview_template = jinja2env.get_template('overview.html')
+    except jinja2.exceptions.TemplateNotFound as ex:
+        print('Tried template dir:' + template_dir)
+        raise ex
 
     html = file_html(figs, CDN, title=title,
                      template=overview_template,
