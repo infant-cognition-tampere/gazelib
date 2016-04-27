@@ -14,6 +14,7 @@ import yaml
 from bokeh.resources import CDN
 from bokeh.embed import file_html
 from jinja2 import Environment, FileSystemLoader
+from jinja2.exceptions import TemplateNotFound
 import os
 
 
@@ -243,8 +244,8 @@ def render_overview(common, output_html_filepath, title='Overview',
     jinja2env = Environment(loader=jinja2loader)
     try:
         overview_template = jinja2env.get_template('overview.html')
-    except jinja2.exceptions.TemplateNotFound as ex:
-        print('Tried template dir:' + template_dir)
+    except TemplateNotFound as ex:
+        print('Tried template dir: ' + template_dir)
         raise ex
 
     html = file_html(figs, CDN, title=title,
