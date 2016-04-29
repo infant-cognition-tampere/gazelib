@@ -205,11 +205,11 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(g.count_events('test/first-half'), 1)
         self.assertEqual(g.count_events(''), 0)
 
-    def test_iter_by_tag(self):
+    def test_iter_slices_by_tag(self):
         raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
 
-        slices = list(g.iter_by_tag('test/center'))
+        slices = list(g.iter_slices_by_tag('test/center'))
 
         self.assertEqual(len(slices), 2)
         self.assertEqual(len(slices[0].raw['events']), 5)
@@ -244,6 +244,9 @@ class TestCommonV1(unittest.TestCase):
         evs = g.iter_events_by_tags(['test/center', 'test/first-half'])
         self.assertTrue(hasattr(evs, '__iter__'))
         self.assertEqual(len(list(evs)), 3)
+
+        evs = list(g.iter_events_by_tags(['foobarbaz']))
+        self.assertEqual(evs, [])
 
     def test_list_tags(self):
         raw = load_fixture('sample.common.json')

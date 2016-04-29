@@ -512,7 +512,7 @@ class CommonV1(object):
         Parameters:
             tags: a list of tags
 
-        Raise MissingTagException if no events found.
+        If no such events found, iter []
         '''
         num_yields = 0
         stags = set(tags)
@@ -523,8 +523,7 @@ class CommonV1(object):
                 yield ev
                 num_yields += 1
         if num_yields == 0:
-            msg = 'Events with tags in (' + ','.join(tags) + ') not found.'
-            raise CommonV1.MissingTagException(msg)
+            return  # Generators allow single return
 
     def iter_by_tag(self, tag, limit_to=None):
         '''DEPRECATED as too vague. Use iter_slices_by_tag instead.'''
@@ -544,7 +543,7 @@ class CommonV1(object):
         Return
             iterable of CommonV1 objects
 
-        Raise MissingTagException if no events found.
+        If no such slices found, iter []
         '''
         for index, event in enumerate(self.iter_events_by_tag(tag)):
             range_start = event['range'][0]
