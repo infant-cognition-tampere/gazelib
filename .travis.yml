@@ -1,3 +1,12 @@
+# Travis setup.
+# Tox + numpy + scipy + coveralls
+#
+# Notes:
+# [1] Miniconda is used to quickly install numpy and scipy. Otherwise
+#     their building time is too much for Travis.
+#     See this gist for details: https://gist.github.com/dan-blanchard/7045057
+#     See also http://conda.pydata.org/docs/travis.html
+
 sudo: false
 language: python
 python:
@@ -6,18 +15,46 @@ python:
   - "3.4"
   - "3.5"
 
+# For contents of before_install, see [1]
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
+  - pip install --upgrade pip
+  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+  #- sudo rm -rf /dev/shm
+  #- sudo ln -s /run/shm /dev/shm
+
 # command to install dependencies
 install:
-  - pip install tox-travis python-coveralls
-
-  ######
-  # If numpy is installing too slowly, see:
-  # - https://gist.github.com/dan-blanchard/7045057
-  # - http://conda.pydata.org/docs/travis.html
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy  # See [1]
+  - pip install python-coveralls nose-cov  # Not available via conda for OS X
+  - python setup.py install
 
 # command to run tests
 script:
-  - tox
+  - nosetests --with-cov --cov gazelib --logging-level=INFO
+  # Command nosetests is installed by nose-cov
 
 after_success:
-  - coveralls
+  - coveralls --config_file .coveragerc
+
+
+
+
+
+# Install packages
+#install:
+#  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels
+  # Coverage packages are on my binstar channel
+#  - conda install --yes -c dan_blanchard python-coveralls nose-cov
+#  - python setup.py install
+
+# Run test
+#script:
+#  - nosetests --with-cov --cov YOUR_PACKAGE_NAME_HERE --cov-config .coveragerc --logging-level=INFO
+
+# Calculate coverage
+#after_success:

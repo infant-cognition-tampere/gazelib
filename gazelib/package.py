@@ -48,7 +48,7 @@ keywords = 'eye-tracking data'
 # requirements files see:
 # https://packaging.python.org/en/latest/requirements.html
 install_requires = ['deepdiff', 'jsonschema', 'saccademodel', 'fixationmodel',
-                    'bokeh', 'six']
+                    'bokeh', 'six', 'numpy', 'scipy']
 # Note for Tox: if install_requires changes, .tox must be removed.
 #               By running $ tox, .tox will be recreated with correct deps.
 
@@ -78,8 +78,7 @@ data_files = []
 # pip to create the appropriate form of executable for the target platform.
 entry_points = {}
 
-# DEPRECATED: Use 'tox' with 'pyenv' instead.
-#   Put test dependencies to 'tox.ini'
-# To use nose2 to run your package’s tests, add the following
-# tests_require = ['nose2', 'unittest2', 'flake8']
-# test_suite = 'nose2.collector.collector'
+# Testing
+# tests_require = [...]
+# test_suite = ''
+# INSTEAD: use command under .travis.yml:script

@@ -4,6 +4,8 @@ Find a linear saccade from the data.
 '''
 from gazelib.statistics import arithmetic_mean, maximum, minimum
 from gazelib.containers import CommonV1
+import numpy as np  # noqa
+import scipy as sp  # noqa
 import saccademodel
 
 
@@ -41,6 +43,8 @@ def fit(g):
     rx = g.raw['streams']['gazelib/gaze/right_eye_x_relative']['values']
     ry = g.raw['streams']['gazelib/gaze/right_eye_y_relative']['values']
 
+    # Median filter
+
     # Pointlists for saccademodel
     lpl = [[x, y] for x, y in zip(lx, ly)]
     rpl = [[x, y] for x, y in zip(rx, ry)]
@@ -57,7 +61,7 @@ def fit(g):
     l_tl_name = g.get_stream_timeline_name('gazelib/gaze/left_eye_x_relative')
     r_tl_name = g.get_stream_timeline_name('gazelib/gaze/right_eye_x_relative')
 
-    # Convert to times
+    # Convert to times.
     llensource = len(lresults['source_points'])
     rlensource = len(rresults['source_points'])
     llensaccade = len(lresults['saccade_points'])
@@ -68,6 +72,7 @@ def fit(g):
                                         llensource + llensaccade - 1)
     rend = g.get_relative_time_by_index(r_tl_name,
                                         rlensource + rlensaccade - 1)
+
     # mean_start = arithmetic_mean([lstart, rstart])
     # mean_end = arithmetic_mean([lend, rend])
     mean_start = minimum([lstart, rstart])

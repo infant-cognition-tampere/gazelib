@@ -7,6 +7,13 @@ class ExtrapolationError(Exception):
 
 def fill_gaps(l):
     '''
+    Given a list of values, extrapolate None values by the last
+    known non-None value. If no preceding non-None values were found, copy
+    the first known value to those.
+
+    Paremeters:
+        l: list of values
+
     Throw
         ExtrapolationError
             if list does not contains any non-null values

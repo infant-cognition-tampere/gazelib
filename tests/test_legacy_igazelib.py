@@ -1,5 +1,8 @@
 from gazelib.legacy import igazelib as gazelib
-import unittest2 as unittest  # to support Python 2.6
+try:
+    import unittest2 as unittest  # to support Python 2.6
+except ImportError:
+    import unittest
 import os
 
 def assertListAlmostEqual(self, lst1, lst2, msg=None):
