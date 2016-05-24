@@ -15,6 +15,7 @@
 
 import sys
 import os
+import mock
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -51,6 +52,11 @@ pkg_description = gazelib.package.description
 #MOCK_MODULES = ['jsonschema']
 #sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 ### Snippet end ###
+
+MOCK_MODULES = ['numpy', 'scipy', 'scipy.signal']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
+
 
 # ReadTheDocs.org do not support sphinx-apidoc out of the box.
 # That requires developer to run sphinx-apidoc manually.

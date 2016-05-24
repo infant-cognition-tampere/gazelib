@@ -20,9 +20,11 @@ See also
 
 - gazelib at GitHub_
 - gazelib at PyPI_
+- gazelib at ReadTheDocs_
 
 .. _GitHub: https://github.com/infant-cognition-tampere/gazelib
 .. _PyPI: https://pypi.python.org/pypi/gazelib
+.. _ReadTheDocs: https://readthedocs.org/projects/gazelib/
 
 
 Indices and tables
