@@ -724,10 +724,12 @@ class CommonV1(object):
         Return new CommonV1 object with data only in the time range specified
         by the indices of the timeline.
 
-        Parameters
-            timeline_name
+        Parameters:
+            timeline_name: string
             start_index: inclusive
-            end_index: optional, exclusive, first element to not be included.
+            end_index:
+            
+                Optional, exclusive, first element to not be included.
                 If None given, slice to the end.
 
         '''

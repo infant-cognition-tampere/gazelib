@@ -22,13 +22,15 @@ def fit(g):
     Raise:
         InsufficientDataException: if streams are missing or they are empty.
 
-    Return:
+    Return::
+
         {
             'type': 'gazelib/gaze/saccade',
             'start_time_relative': <int microseconds>
             'end_time_relative': <int microseconds>
             'mean_squared_error': <float>
         }
+        
     '''
     g.assert_has_streams([
         'gazelib/gaze/left_eye_x_relative',

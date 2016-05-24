@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from gazelib.legacy import igazelib as gazelib
 try:
     import unittest2 as unittest  # to support Python 2.6

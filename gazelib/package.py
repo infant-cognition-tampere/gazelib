@@ -49,8 +49,6 @@ keywords = 'eye-tracking data'
 # https://packaging.python.org/en/latest/requirements.html
 install_requires = ['deepdiff', 'jsonschema', 'saccademodel', 'fixationmodel',
                     'bokeh', 'six', 'numpy', 'scipy']
-# Note for Tox: if install_requires changes, .tox must be removed.
-#               By running $ tox, .tox will be recreated with correct deps.
 
 # List additional groups of dependencies here (e.g. development
 # dependencies). You can install these using the following syntax,

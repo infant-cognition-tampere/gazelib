@@ -7,18 +7,16 @@ from gazelib.conversion import utils
 def convert(gazedata_file_path, experiment_config_file_path,
             participant_number, trial_config_id, was_calibrated):
     '''
-    Parameters
-        gazedata_file_path
-        experiment_config_file_path
-        participant_number
-            string
-        trial_config_id
-            e.g. 'SRT1'
-        was_calibrated
-            boolean
+    Parameters:
+        gazedata_file_path: string
+        experiment_config_file_path: string
+        participant_number: string
+        trial_config_id: e.g. 'SRT1'
+        was_calibrated: boolean
 
-    Return
+    Return:
         CommonV1 object
+    
     '''
 
     # Read the files

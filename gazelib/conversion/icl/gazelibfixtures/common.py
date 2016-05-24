@@ -6,13 +6,12 @@ from gazelib.conversion import utils
 
 def convert(gazedata_file_path, experiment_config_file_path, trial_config_id):
     '''
-    Parameters
-        gazedata_file_path
-        experiment_config_file_path
-        trial_config_id
-            'mid' or 'shift'
+    Parameters:
+        gazedata_file_path: string
+        experiment_config_file_path: string
+        trial_config_id: 'mid' or 'shift'
 
-    Return
+    Return:
         CommonV1 object
     '''
 

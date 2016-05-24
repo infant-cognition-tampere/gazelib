@@ -36,27 +36,29 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
     the end time of the previous range. Invalid values do not cause splits.
 
     Parameters:
-        gd
+        gd:
             gazedata as list of dicts
-        value_converter
+        value_converter:
             A function that converts from raw row to the value
             used for comparison and also in yielded dicts.
             Must raise ValueError or TypeError if value cannot be converted.
             On ValueError or TypeError the row will be skipped.
-        time_converter
+        time_converter:
             A function that converts from raw row to times used
             in ranges.
             Must return integer.
             Must raise ValueError or TypeError if time cannot be converted.
             On ValueError or TypeError the row will be skipped.
 
-    Yields dicts:
+    Yields dicts::
+
         {
-          'start': <integer, start time of range, inclusive>,
-          'end': <integer, end time of range, exclusive>,
-          'value': <the value of the range>
-          'first': <first point in range>
+            'start': <integer, start time of range, inclusive>,
+            'end': <integer, end time of range, exclusive>,
+            'value': <the value of the range>,
+            'first': <first point in range>
         }
+    
     '''
 
     # Estimate sample interval (i.e. 1 / sampling rate)
