@@ -40,4 +40,4 @@ script:
   - nosetests --with-cov --cov gazelib --logging-level=INFO
 
 after_success:
-  - coveralls --config_file .coveragerc
+  - coveralls
