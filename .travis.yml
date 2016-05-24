@@ -17,11 +17,18 @@ python:
 
 # For contents of before_install, see [1]
 before_install:
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export "PATH=/home/travis/miniconda2/bin:$PATH"
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export "PATH=$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
   - conda update --yes conda
+  # Useful for debugging any issues with conda
+  - conda info -a
   - pip install --upgrade pip
   # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
   #- sudo rm -rf /dev/shm
@@ -29,7 +36,8 @@ before_install:
 
 # command to install dependencies
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy  # See [1]
+  - conda create --quiet --name testenv python=$TRAVIS_PYTHON_VERSION numpy scipy  # See [1]
+  - source activate testenv
   - pip install python-coveralls nose-cov  # Not available via conda for OS X
   - python setup.py install
 
