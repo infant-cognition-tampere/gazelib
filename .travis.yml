@@ -34,28 +34,10 @@ install:
   - pip install python-coveralls nose-cov flake8  # Not available via conda for OS X
   - python setup.py install
 
-# command to run tests
+# Commands to run tests.
+# Command nosetests is installed by nose-cov
 script:
   - nosetests --with-cov --cov gazelib --logging-level=INFO
-  # Command nosetests is installed by nose-cov
 
 after_success:
   - coveralls --config_file .coveragerc
-
-
-
-
-
-# Install packages
-#install:
-#  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels
-  # Coverage packages are on my binstar channel
-#  - conda install --yes -c dan_blanchard python-coveralls nose-cov
-#  - python setup.py install
-
-# Run test
-#script:
-#  - nosetests --with-cov --cov YOUR_PACKAGE_NAME_HERE --cov-config .coveragerc --logging-level=INFO
-
-# Calculate coverage
-#after_success:
