@@ -22,7 +22,7 @@ def get_valid_sublists(l, validator=isNotNone):
             Defaults to testing if value is not None.
 
     Example::
-    
+
         >>> get_valid_sublists([1, 2, None, 3])
         [[1, 2], [3]]
 

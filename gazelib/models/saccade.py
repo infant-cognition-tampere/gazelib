@@ -30,7 +30,7 @@ def fit(g):
             'end_time_relative': <int microseconds>
             'mean_squared_error': <float>
         }
-        
+
     '''
     g.assert_has_streams([
         'gazelib/gaze/left_eye_x_relative',

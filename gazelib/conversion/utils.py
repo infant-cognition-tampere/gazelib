@@ -58,7 +58,7 @@ def split_to_ranges_at_change_in_value(gd, value_converter, time_converter):
             'value': <the value of the range>,
             'first': <first point in range>
         }
-    
+
     '''
 
     # Estimate sample interval (i.e. 1 / sampling rate)

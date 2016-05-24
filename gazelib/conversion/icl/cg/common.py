@@ -16,7 +16,7 @@ def convert(gazedata_file_path, experiment_config_file_path,
 
     Return:
         CommonV1 object
-    
+
     '''
 
     # Read the files

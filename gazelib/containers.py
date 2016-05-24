@@ -728,7 +728,7 @@ class CommonV1(object):
             timeline_name: string
             start_index: inclusive
             end_index:
-            
+
                 Optional, exclusive, first element to not be included.
                 If None given, slice to the end.
 
