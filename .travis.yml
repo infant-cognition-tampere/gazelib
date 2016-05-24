@@ -12,11 +12,10 @@ language: python
 python:
   - "2.7"
   - "3.3"
-  - "3.4"
   - "3.5"
 
-# For contents of before_install, see [1]
-before_install:
+# For contents of install, see [1]
+install:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
     else
@@ -30,15 +29,9 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
   - pip install --upgrade pip
-  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
-  #- sudo rm -rf /dev/shm
-  #- sudo ln -s /run/shm /dev/shm
-
-# command to install dependencies
-install:
   - conda create --quiet --name testenv python=$TRAVIS_PYTHON_VERSION numpy scipy  # See [1]
   - source activate testenv
-  - pip install python-coveralls nose-cov  # Not available via conda for OS X
+  - pip install python-coveralls nose-cov flake8  # Not available via conda for OS X
   - python setup.py install
 
 # command to run tests
