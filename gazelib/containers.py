@@ -53,7 +53,8 @@ class CommonV1(object):
         pass
 
     class InsufficientDataException(Exception):
-        '''Raised if a timeline does not fit the CommonV1 specification.'''
+        '''Raised if container does not provide required data.
+        For example if some streams are missing.'''
         pass
 
     class InvalidTimeException(Exception):

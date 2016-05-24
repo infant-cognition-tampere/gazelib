@@ -2,10 +2,8 @@
 '''
 Find a linear saccade from the data.
 '''
-from gazelib.statistics import arithmetic_mean, maximum, minimum
 from gazelib.containers import CommonV1
-from gazelib.preprocessing import fill_gaps
-#import numpy as np  # noqa
+from gazelib.preprocessing import fill_gaps, ExtrapolationError
 import scipy.signal
 import saccademodel
 
@@ -48,18 +46,23 @@ def fit(g):
     ry = g.raw['streams']['gazelib/gaze/right_eye_y_relative']['values']
 
     # Forward fill
-    lx_fill = fill_gaps(lx)
-    ly_fill = fill_gaps(ly)
-    rx_fill = fill_gaps(rx)
-    ry_fill = fill_gaps(ry)
+    try:
+        lx_fill = fill_gaps(lx)
+        ly_fill = fill_gaps(ly)
+        rx_fill = fill_gaps(rx)
+        ry_fill = fill_gaps(ry)
+    except ExtrapolationError:
+        # Only nones or empty
+        msg = 'Cannot find saccade from empty data.'
+        raise CommonV1.InsufficientDataException(msg)
 
     # Median filter
     # Required to remove non-Gaussian noise i.e. random outliers
     # Saccademodel handles Gaussian noise.
     lx_filt = scipy.signal.medfilt(lx_fill, 5)
     ly_filt = scipy.signal.medfilt(ly_fill, 5)
-    rx_filt = scipy.signal.medfilt(lx_fill, 5)
-    ry_filt = scipy.signal.medfilt(lx_fill, 5)
+    rx_filt = scipy.signal.medfilt(rx_fill, 5)
+    ry_filt = scipy.signal.medfilt(ry_fill, 5)
 
     # Pointlists for saccademodel
     lpl = [[x, y] for x, y in zip(lx_filt, ly_filt)]
@@ -70,8 +73,8 @@ def fit(g):
         lresults = saccademodel.fit(lpl)
         rresults = saccademodel.fit(rpl)
     except saccademodel.interpolate.InterpolationError:
-        raise CommonV1.InsufficientDataException('Cannot find saccade from' +
-                                                 'empty data.')
+        msg = 'Cannot find saccade from empty data.'
+        raise CommonV1.InsufficientDataException(msg)
 
     # Pick one with smallest error
     lerr = lresults['mean_squared_error']
@@ -86,15 +89,13 @@ def fit(g):
     # Convert measured saccade end and start to times.
     lensource = len(results['source_points'])
     lensaccade = len(results['saccade_points'])
-    #print('lensource:  ' + str(lensource))
-    #print('lensaccade: ' + str(lensaccade))
+
     start_index = max(0, lensource - 1)  # do not let below zero
     end_index = max(0, lensource + lensaccade - 1)  # do not let above length
 
     start = g.get_relative_time_by_index(tl_name, start_index)
     end = g.get_relative_time_by_index(tl_name, end_index)
-    #print('start: ' + str(start))
-    #print('end:   ' + str(end))
+
     return {
         'type': 'gazelib/gaze/saccade',
         'start_time_relative': start,  # microseconds
