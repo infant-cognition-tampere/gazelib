@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 name = 'gazelib'
-version = '2.0.0'
+version = '2.1.0'
 description = 'Software tools to manage and analyze data from eye-trackers'
 url = 'https://github.com/infant-cognition-tampere/gazelib'
 author = 'Akseli Palen'
@@ -48,9 +48,7 @@ keywords = 'eye-tracking data'
 # requirements files see:
 # https://packaging.python.org/en/latest/requirements.html
 install_requires = ['deepdiff', 'jsonschema', 'saccademodel', 'fixationmodel',
-                    'bokeh', 'six']
-# Note for Tox: if install_requires changes, .tox must be removed.
-#               By running $ tox, .tox will be recreated with correct deps.
+                    'bokeh', 'six', 'numpy', 'scipy']
 
 # List additional groups of dependencies here (e.g. development
 # dependencies). You can install these using the following syntax,
@@ -63,7 +61,9 @@ extras_require = {
 # If there are data files included in your packages that need to be
 # installed, specify them here.  If using Python 2.6 or less, then these
 # have to be included in MANIFEST.in as well.
-package_data = {}
+package_data = {
+    'gazelib': ['visualization/templates/*.html']
+}
 
 # Although 'package_data' is the preferred approach, in some case you may
 # need to place data files outside of your packages. See:
@@ -76,8 +76,7 @@ data_files = []
 # pip to create the appropriate form of executable for the target platform.
 entry_points = {}
 
-# DEPRECATED: Use 'tox' with 'pyenv' instead.
-#   Put test dependencies to 'tox.ini'
-# To use nose2 to run your package’s tests, add the following
-# tests_require = ['nose2', 'unittest2', 'flake8']
-# test_suite = 'nose2.collector.collector'
+# Testing
+# tests_require = [...]
+# test_suite = ''
+# INSTEAD: use command under .travis.yml:script

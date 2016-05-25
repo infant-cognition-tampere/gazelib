@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 import bokeh.plotting as plotting
 from . import utils
+import gazelib.preprocessing as gpre
+
+# For printing environments
+import yaml
+
+# Custom HTML templates are required by custom HTML such as tables.
+# The following setup is needed for custom HTML with bokeh.
+# See http://bokeh.pydata.org/en/0.10.0/docs/user_guide/embed.html
+# See http://bokeh.pydata.org/en/latest/docs/reference/embed.html
+# For FileSystemLoader, see https://gist.github.com/wrunk/1317933
+from bokeh.resources import CDN
+from bokeh.embed import file_html
+from jinja2 import Environment, FileSystemLoader
+from jinja2.exceptions import TemplateNotFound
+import os
 
 
 def render_path(common, output_html_filepath, title='Path'):
@@ -61,12 +76,19 @@ def render_path_for_each_event(common, event_tag, output_html_filepath):
     pass
 
 
-def render_overview(common, output_html_filepath, title='Overview'):
+def render_overview(common, output_html_filepath, title='Overview',
+                    emphasize_gaps=False):
     '''
     Create HTML-based visualization from all streams and events.
     Does not understand stream or event semantics like gaze paths for example.
 
     Can be slow if streams contain large number of gaps.
+
+    Parameters:
+        common: A CommonV1 object
+        output_html_filepath: a filepath as string
+        title: HTML page title as string
+        emphasize_gaps: if False, do not show red gaps. Makes it quicker.
     '''
 
     # Collect figures together
@@ -89,6 +111,19 @@ def render_overview(common, output_html_filepath, title='Overview'):
         return 'black'
 
     #########
+    # Environment constants
+    #########
+
+    # Build dict
+    env_names = common.list_environment_names()
+    envs = {name: common.get_environment(name) for name in env_names}
+    # Make human readable
+    # yaml.safe_dump instad of yaml.dump to avoid annoying unicode tags
+    # See http://stackoverflow.com/a/1950399/638546
+    env_yaml = yaml.safe_dump(envs, default_flow_style=False)
+    env_html = '<pre>' + env_yaml + '</pre>'
+
+    #########
     # Streams
     #########
 
@@ -99,27 +134,34 @@ def render_overview(common, output_html_filepath, title='Overview'):
         y = stream['values']
         color = pick_color(stream)
 
-        # Get valid substreams
-        sl = utils.get_valid_sublists_2d(x, y)
-
         fig = plotting.figure(title=stream_name, x_axis_label='time (ms)',
                               plot_width=1000, plot_height=300,
                               toolbar_location=None)
 
-        for xs, ys in sl:
-            fig.line(xs, ys, line_color=color)
+        if emphasize_gaps:
+            # Emphasize gaps with red. Slow if data very gapped.
+            # Get valid substreams
+            sl = utils.get_valid_sublists_2d(x, y)
 
-        # Emphasize gaps with red line.
-        # Loop pairwise, fill gaps.
-        # TODO Optimize. Currently very slow.
-        for i in range(len(sl) - 1):
-            xs0, ys0 = sl[i]
-            xs1, ys1 = sl[i + 1]
-            # Extrapolate from last known value
-            x0 = xs0[-1]
-            x1 = xs1[0]
-            y = ys0[-1]
-            fig.line(x=[x0, x1], y=[y, y], line_width=1, line_color='red')
+            for xs, ys in sl:
+                fig.line(xs, ys, line_color=color)
+
+            # Emphasize gaps with red line.
+            # Loop pairwise, fill gaps.
+            # TODO Optimize. Currently very slow.
+            for i in range(len(sl) - 1):
+                xs0, ys0 = sl[i]
+                xs1, ys1 = sl[i + 1]
+                # Extrapolate from last known value
+                x0 = xs0[-1]
+                x1 = xs1[0]
+                y = ys0[-1]
+                fig.line(x=[x0, x1], y=[y, y], line_width=1, line_color='red')
+        else:
+            # Fill gaps and draw single line.
+            # This should be much faster.
+            yy = gpre.fill_gaps(y)
+            fig.line(x=x, y=yy, line_width=1, line_color=color)
 
         figs.append(fig)
 
@@ -190,8 +232,29 @@ def render_overview(common, output_html_filepath, title='Overview'):
 
     figs.append(fig)
 
-    # Lay out multiple figures
-    p = plotting.vplot(*figs)
-    # Save
-    plotting.output_file(output_html_filepath, title)
-    plotting.save(p)
+    # Make human readable
+    evs_rev = list(reversed(evs))
+    evs_yaml = yaml.safe_dump(evs_rev, default_flow_style=False)
+    evs_html = '<pre>' + evs_yaml + '</pre>'
+
+    ###########
+    # Render HTML
+    ##########
+
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    template_dir = os.path.join(this_dir, 'templates')
+    jinja2loader = FileSystemLoader(template_dir)
+    jinja2env = Environment(loader=jinja2loader)
+    try:
+        overview_template = jinja2env.get_template('overview.html')
+    except TemplateNotFound as ex:
+        print('Tried template dir: ' + template_dir)
+        raise ex
+
+    html = file_html(figs, CDN, title=title,
+                     template=overview_template,
+                     template_variables={'environment': env_html,
+                                         'events': evs_html})
+    # Save as html file.
+    with open(output_html_filepath, 'w') as f:
+        f.write(html)

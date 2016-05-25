@@ -4,6 +4,9 @@ try:
 except ImportError:
     import unittest
 
+from os.path import isfile
+from .utils import (get_temp_filepath, remove_temp_file, load_fixture)
+from gazelib.containers import CommonV1
 import gazelib.visualization as unit
 
 class TestUtils(unittest.TestCase):
@@ -18,6 +21,14 @@ class TestUtils(unittest.TestCase):
         l = []
         sl = unit.utils.get_valid_sublists(l)
         self.assertEqual(sl, [])
+
+    def test_render_overview_without_errors(self):
+        raw = load_fixture('sample.common.json')
+        c = CommonV1(raw)
+        fpath = get_temp_filepath('myfile.html')
+        unit.common.render_overview(c, fpath)
+        isfile(fpath)
+        remove_temp_file(fpath)
 
 if __name__ == '__main__':
     unittest.main()

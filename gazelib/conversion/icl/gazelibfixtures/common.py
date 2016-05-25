@@ -6,13 +6,12 @@ from gazelib.conversion import utils
 
 def convert(gazedata_file_path, experiment_config_file_path, trial_config_id):
     '''
-    Parameters
-        gazedata_file_path
-        experiment_config_file_path
-        trial_config_id
-            'mid' or 'shift'
+    Parameters:
+        gazedata_file_path: string
+        experiment_config_file_path: string
+        trial_config_id: 'mid' or 'shift'
 
-    Return
+    Return:
         CommonV1 object
     '''
 
@@ -41,7 +40,7 @@ def convert(gazedata_file_path, experiment_config_file_path, trial_config_id):
     c.add_environment('icl/gaze/trial_configuration_id', trial_config_id)
 
     source_files = [gazedata_file_path, experiment_config_file_path]
-    source_files = map(path.basename, source_files)
+    source_files = list(map(path.basename, source_files))
     c.add_environment('gazelib/general/source_files', source_files)
 
     assert isinstance(was_calibrated, bool)

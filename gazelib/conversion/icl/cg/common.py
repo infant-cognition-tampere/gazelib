@@ -7,18 +7,16 @@ from gazelib.conversion import utils
 def convert(gazedata_file_path, experiment_config_file_path,
             participant_number, trial_config_id, was_calibrated):
     '''
-    Parameters
-        gazedata_file_path
-        experiment_config_file_path
-        participant_number
-            string
-        trial_config_id
-            e.g. 'SRT1'
-        was_calibrated
-            boolean
+    Parameters:
+        gazedata_file_path: string
+        experiment_config_file_path: string
+        participant_number: string
+        trial_config_id: e.g. 'SRT1'
+        was_calibrated: boolean
 
-    Return
+    Return:
         CommonV1 object
+
     '''
 
     # Read the files
@@ -42,7 +40,7 @@ def convert(gazedata_file_path, experiment_config_file_path,
     c.add_environment('icl/gaze/trial_configuration_id', trial_config_id)
 
     source_files = [gazedata_file_path, experiment_config_file_path]
-    source_files = map(path.basename, source_files)
+    source_files = list(map(path.basename, source_files))
     c.add_environment('gazelib/general/source_files', source_files)
 
     assert isinstance(was_calibrated, bool)

@@ -1,5 +1,5 @@
 .. gazelib documentation master file, created by
-   sphinx-quickstart on Wed Feb 24 17:51:51 2016.
+   sphinx-quickstart on Tue May 24 17:13:47 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -13,16 +13,18 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
-   modules
+    modules
 
 See also
 --------
 
 - gazelib at GitHub_
 - gazelib at PyPI_
+- gazelib at ReadTheDocs_
 
 .. _GitHub: https://github.com/infant-cognition-tampere/gazelib
 .. _PyPI: https://pypi.python.org/pypi/gazelib
+.. _ReadTheDocs: https://readthedocs.org/projects/gazelib/
 
 
 Indices and tables

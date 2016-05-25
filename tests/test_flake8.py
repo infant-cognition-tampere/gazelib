@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''Test suite which runs flake8, i.e. ensures PEP8 code convetions and more.'''
 
 try:
