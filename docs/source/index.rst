@@ -13,7 +13,7 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
-    source/modules
+   modules
 
 See also
 --------
