@@ -484,7 +484,7 @@ def gaze_inside_aoi_percentage(data, xcol, ycol, aoi, silent=True):
 
 def longest_non_valid_streak(data, valkey, timekey, accepted_validities,
                              silent=True):
-    '''Longest streak of non valid values'''
+    '''Longest streak of invalid values'''
 
     if not silent:
         print("Calculating longest non-valid streak...")
@@ -546,7 +546,7 @@ def duration(data, timekey):
 
 
 def SRT_index(rtimes, max_rt, min_rt):
-    '''calculate SRT index (Leppanen et al.)'''
+    '''Calculate SRT index (Leppanen et al.)'''
 
     SRTs = []
 
@@ -582,7 +582,7 @@ def group_lists(datas, group_key):
     '''
     Groups data by 0'th value in group_column and places each subset to a group
     defined by group_column.
-    parameter: list of datas (data:list of rows), grouping key
+    parameter: list of list of rows, grouping key
     value in datapoint[0][group_key] expected to exist
     '''
 
