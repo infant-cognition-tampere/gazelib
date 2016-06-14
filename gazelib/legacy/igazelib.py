@@ -582,7 +582,7 @@ def group_lists(datas, group_key):
     '''
     Groups data by 0'th value in group_column and places each subset to a group
     defined by group_column.
-    parameter: list of datas (data:list of rows), grouping key
+    parameter: list of list of rows, grouping key
     value in datapoint[0][group_key] expected to exist
     '''
 
