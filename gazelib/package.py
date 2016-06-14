@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 name = 'gazelib'
-version = '2.1.0'
+version = '2.1.1'
 description = 'Software tools to manage and analyze data from eye-trackers'
 url = 'https://github.com/infant-cognition-tampere/gazelib'
 author = 'Akseli Palen'
