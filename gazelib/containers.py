@@ -578,6 +578,10 @@ class CommonV1(object):
 
         return list(tags.keys())
 
+    def list_timeline_names(self):
+        '''Return list of names of stored timelines.'''
+        return list(self.raw['timelines'].keys())
+
     def slice_by_relative_time(self, rel_start_time, rel_end_time=None):
         '''
         Return new CommonV1 object with data only in the time range.

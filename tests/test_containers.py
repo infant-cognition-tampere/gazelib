@@ -216,6 +216,18 @@ class TestCommonV1(unittest.TestCase):
         self.assertEqual(len(slices[1].raw['events']), 4)  # no first-half
         self.assertEqual(len(slices[1].raw['timelines']['eyetracker']), 1)
 
+    def test_list_timeline_names(self):
+        raw = load_fixture('sample.common.json')
+        g = gazelib.containers.CommonV1(raw)
+        lines = g.list_timeline_names()
+        self.assertIn('eyetracker', lines)
+        self.assertIn('ecg', lines)
+        self.assertEqual(len(lines), 2)
+
+        empty = gazelib.containers.CommonV1()
+        lines = empty.list_timeline_names()
+        self.assertEqual(len(lines), 0)
+
     def test_iter_events(self):
         raw = load_fixture('sample.common.json')
         g = gazelib.containers.CommonV1(raw)
