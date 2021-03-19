@@ -9,7 +9,7 @@ docutils==0.12
 fixationmodel==0.1.3
 -e git+https://github.com/infant-cognition-tampere/gazelib.git@50e130ac2f89c6391a59ebf363367d452e601d1c#egg=gazelib
 imagesize==0.7.1
-Jinja2==2.8
+Jinja2==2.11.3
 jsonschema==2.5.1
 livereload==2.4.1
 MarkupSafe==0.23
